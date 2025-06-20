@@ -79,21 +79,24 @@ class ValidacionReglasProvider extends ChangeNotifier {
     if (data['Reglas']['success'] == true) {
       resultadoMensaje = data['Reglas']['message'] ?? 'Mensaje no disponible';
 
-      if (data['Reglas']['wrapper'] != null) {
+      if (data['Reglas']['wrapper'].length > 0) {
         final reglas = data['Reglas']['wrapper'] as List;
 
         _processReglas(reglas);
-        return true;
+        return false;
       } else {
         _setErrorMessage(
             'La respuesta del servidor no contiene reglas validadas.');
-        return false;
+        return true;
       }
+
     } else {
-      resultadoMensaje = 'El tren $idTren tiene incumplimientos de reglas.';
-      if (data['Reglas']['wrapper'] != null) {
+
+      resultadoMensaje = data['Reglas']['message'] ?? 'Mensaje no disponible';
+      if (data['Reglas']['wrapper'].length > 0) {
         final reglas = data['Reglas']['wrapper'] as List;
         _processReglas(reglas, soloIncumplidas: true);
+        return false;
       }
       return false;
     }

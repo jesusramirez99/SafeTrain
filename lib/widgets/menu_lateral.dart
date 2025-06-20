@@ -159,10 +159,7 @@ class MenuLateralState extends State<MenuLateral> {
   }
 
   String _formatViolationRules(List<Map<String, dynamic>> reglasIncumplidas) {
-    if (reglasIncumplidas.isEmpty) {
-      return "No hay reglas incumplidas.";
-    }
-
+  
     // Título de la sección
     String result = "Error de formación\n\n";
 
@@ -195,8 +192,7 @@ class MenuLateralState extends State<MenuLateral> {
     final selectedEstacion =
         Provider.of<EstacionesProvider>(context, listen: false);
     final estacion = selectedEstacion.selectedEstacion;
-    final validacionProvider =
-        Provider.of<ValidacionReglasProvider>(context, listen: false);
+    final validacionProvider = Provider.of<ValidacionReglasProvider>(context, listen: false);
     final userName = Provider.of<UserProvider>(context, listen: false);
     final user = userName.userName;
 
@@ -217,19 +213,13 @@ class MenuLateralState extends State<MenuLateral> {
                         await Future.delayed(const Duration(seconds: 5));
 
                         // Llamamos a validacionReglas para obtener las reglas validadas
-                        bool isValid =
-                            await validacionProvider.validacionReglas(
-                          tren!,
-                          estacion!,
-                          '',
-                          user!,
-                          estacion,
-                        );
+                        bool isValid = await validacionProvider.validacionReglas(tren!, estacion!, '', user!, estacion);
 
+                        print('Reglas: ${isValid}');
+                        
                         if (isValid) {
-                          _showFlushbar(
-                            context,
-                            'Validación exitosa: ${validacionProvider.resultadoMensaje}',
+                          _showFlushbar(context,
+                            '${validacionProvider.resultadoMensaje}',
                             Colors.green.shade500,
                             const Duration(seconds: 6),
                           );
@@ -251,25 +241,20 @@ class MenuLateralState extends State<MenuLateral> {
                             validacionProvider.resultadoMensaje,
                           );
                         } else {
-                          final mensaje = _formatViolationRules(
-                              validacionProvider.reglasIncumplidas);
+                          final mensaje = _formatViolationRules(validacionProvider.reglasIncumplidas);
 
-                          print(
-                              "Reglas incumplidas: ${validacionProvider.reglasIncumplidas}");
-
+                          print("Reglas incumplidas: ${validacionProvider.reglasIncumplidas}");
+                          
                           _showFlushbarReglas(
                             context,
-                            mensaje,
-                            Colors.red,
+                            validacionProvider.reglasIncumplidas.isEmpty ? validacionProvider.resultadoMensaje : mensaje,
+                            Colors.red.shade500,
                             const Duration(seconds: 5),
                           );
 
                           await Future.delayed(const Duration(seconds: 3));
 
-                          await Provider.of<ReglasIncumplidasTrenProvider>(
-                                  context,
-                                  listen: false)
-                              .fetchReglasIncumplidas(tren, estacion);
+                          await Provider.of<ReglasIncumplidasTrenProvider>(context, listen: false).fetchReglasIncumplidas(tren, estacion);
 
                           // Ahora mostramos el modal con los datos cargados
                           showDialog(
@@ -279,7 +264,7 @@ class MenuLateralState extends State<MenuLateral> {
                               return const ModalCarrosReglasIncumplidas(); // Modal para ver los carros que incumplen reglas
                             },
                           );
-
+                        
                           setState(() {
                             widget.toggleTableInfo();
                             //_isButtonEnabled = false;
@@ -638,7 +623,7 @@ class MenuLateralState extends State<MenuLateral> {
         ),
       ),
       messageText: SizedBox(
-        height: 140,
+        //height: 140,
         child: Scrollbar(
           thumbVisibility: true,
           child: SingleChildScrollView(

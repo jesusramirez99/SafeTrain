@@ -125,7 +125,7 @@ class _IndicatorTrainTableState extends State<IndicatorTrainTable> {
     'Total Toneladas': 'totalToneladas',
     'Tonelaje Minimo': 'tonelajeMin',
     '% Toneladas': 'porcentajeTonelaje',
-    'Longitud': 'longitud',
+    'Total Longitud': 'longitud',
     'Longitud Minima': 'longitudMin',
     '% Longitud': 'porcentajeLongitud',
     'Capacidad Locomotoras': 'capacidadLocomotoras',
@@ -136,7 +136,7 @@ class _IndicatorTrainTableState extends State<IndicatorTrainTable> {
     'Ubicación / Rango Frenos de Aire': 'ubicacion',
     'Lotes Programados': 'lotesProgramados',
     'Lotes en el Tren\nLocomotoras a AFT': 'lotesTren',
-    'Lotes fuera de programa': 'lotesFueraDePrograma'
+    'Lotes fuera de programa': 'fueraPrograma'
   };
 
   Widget _buildSegment(

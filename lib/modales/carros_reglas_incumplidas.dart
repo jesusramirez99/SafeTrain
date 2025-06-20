@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:safe_train/modelos/reglas_incumplidas_tren.dart';
 import 'package:safe_train/modelos/reglas_incumplidas_tren_modelo.dart';
+import 'package:safe_train/modelos/validacion_reglas_provider.dart';
 
 class ModalCarrosReglasIncumplidas extends StatefulWidget {
   const ModalCarrosReglasIncumplidas({super.key});
@@ -18,6 +19,9 @@ class _ModalCarrosReglasIncumplidasState
 
   @override
   Widget build(BuildContext context) {
+
+    final validacionProvider = Provider.of<ValidacionReglasProvider>(context, listen: false);
+    final reglasProvider = Provider.of<ReglasIncumplidasTrenProvider>(context);
     return Transform.translate(
       offset: offset,
       child: GestureDetector(
@@ -68,7 +72,60 @@ class _ModalCarrosReglasIncumplidasState
                     thickness: 1,
                   ),
                   const SizedBox(height: 10.0),
-                  Consumer<ReglasIncumplidasTrenProvider>(
+
+                  reglasProvider.reglasIncumplidas.isNotEmpty
+                  ? Consumer<ReglasIncumplidasTrenProvider>(
+                      builder: (context, provider, child) {
+                        if (provider.isLoading) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+
+                        Map<String, List<ReglasIncumplidasTren>> reglasAgrupadas =
+                            _agruparPorReglas(provider.reglasIncumplidas);
+
+                        return Column(
+                          children: reglasAgrupadas.keys.map((regla) {
+                            var reglas = reglasAgrupadas[regla]!;
+
+                            String descripcion = reglas.isNotEmpty
+                                ? reglas[0].descripcion
+                                : 'Mensaje no disponible';
+
+                            return Column(
+                              children: [
+                                buildSegment(
+                                  context,
+                                  title: regla,
+                                  descripcion: descripcion,
+                                  data: reglas
+                                      .map((r) => [
+                                            r.sec.toString(),
+                                            r.carro,
+                                            r.descripcion,
+                                          ])
+                                      .toList(),
+                                ),
+                                const SizedBox(height: 23.0),
+                              ],
+                            );
+                          }).toList(),
+                        );
+                      },
+                    )
+                  : 
+                  const SizedBox(height: 50.0),
+                  Center(
+                      child: Text(
+                        validacionProvider.resultadoMensaje ?? 'No se encontraron reglas incumplidas.',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold, // <- CORRECTO
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+
+                 /* Consumer<ReglasIncumplidasTrenProvider>(
                     builder: (context, provider, child) {
                       // Indicador de carga mientras se obtienen datos
                       if (provider.isLoading) {
@@ -83,10 +140,8 @@ class _ModalCarrosReglasIncumplidasState
                         children: reglasAgrupadas.keys.map((regla) {
                           var reglas = reglasAgrupadas[regla]!;
 
-                          String descripcion = reglas.isNotEmpty
-                              ? reglas[0].descripcion
-                              : "Descripción no disponible";
-
+                          String descripcion = reglas.isNotEmpty? reglas[0].descripcion : validacionProvider.resultadoMensaje;
+                          //print('descripcion de errores:'+descripcion);
                           return Column(
                             children: [
                               buildSegment(
@@ -107,7 +162,8 @@ class _ModalCarrosReglasIncumplidasState
                         }).toList(),
                       );
                     },
-                  ),
+                  ),*/
+
                 ],
               ),
             ),
