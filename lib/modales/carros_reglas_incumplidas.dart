@@ -36,8 +36,8 @@ class _ModalCarrosReglasIncumplidasState
             borderRadius: BorderRadius.circular(16),
           ),
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.6,
-            height: MediaQuery.of(context).size.height * 0.5,
+            width:  reglasProvider.reglasIncumplidas.isNotEmpty? MediaQuery.of(context).size.width * 0.6 : MediaQuery.of(context).size.width * 0.4,
+            height: reglasProvider.reglasIncumplidas.isNotEmpty? MediaQuery.of(context).size.height * 0.5 : MediaQuery.of(context).size.height * 0.3,
             padding: const EdgeInsets.all(16),
             child: SingleChildScrollView(
               child: Column(
@@ -118,7 +118,7 @@ class _ModalCarrosReglasIncumplidasState
                       child: Text(
                         validacionProvider.resultadoMensaje ?? 'No se encontraron reglas incumplidas.',
                         style: const TextStyle(
-                          fontSize: 20,
+                          fontSize: 25,
                           fontWeight: FontWeight.bold, // <- CORRECTO
                         ),
                         textAlign: TextAlign.center,

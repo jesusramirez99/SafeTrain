@@ -42,6 +42,7 @@ enum TableView { none, indicators, information }
 class MenuLateralState extends State<MenuLateral> {
   //bool _isButtonEnabled = true;
   TableView? _currentView;
+  Offset? offset;
 
   @override
   Widget build(BuildContext context) {
@@ -430,166 +431,182 @@ class MenuLateralState extends State<MenuLateral> {
     await tableProvider.refreshTableDataTrain(context, train!, estacion!);
   }
 
-  void _showConfirmationDialog(BuildContext context,
-      List<Map<String, dynamic>> reglasValidadas, String resultadoMensaje) {
-    showDialog<void>(
+  void _showConfirmationDialog(BuildContext context, List<Map<String, dynamic>> reglasValidadas, String resultadoMensaje) {
+  showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.4,
-            height: MediaQuery.of(context).size.height * 0.4,
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setDialogState) {
+            final screenSize = MediaQuery.of(context).size;
+            final dialogWidth = screenSize.width * 0.4;
+            final dialogHeight = screenSize.height * 0.4;
+            offset ??= Offset(
+              (screenSize.width - dialogWidth) / 2,
+              (screenSize.height - dialogHeight) / 2,
+            );
+            return Stack(
               children: [
-                const SizedBox(height: 20.0),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Center(
-                          child: Text(
-                            'Formación Correcta.',
-                            style: TextStyle(
-                              fontSize: 21.0,
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
+                Positioned(
+                  left: offset!.dx,
+                  top: offset!.dy,
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setDialogState(() {
+                        offset = offset! + details.delta;
+                      });
+                    },
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        height: MediaQuery.of(context).size.height * 0.4,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 8,
+                              offset: Offset(0, 2),
                             ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(height: 45.0),
-                        Center(
-                          child: Text(
-                            resultadoMensaje,
-                            style: const TextStyle(
-                              fontSize: 22.0,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text(
-                      '¿Deseas envíar el ofrecimiento del tren?',
-                      style: TextStyle(color: Colors.black, fontSize: 17.0),
-                    ),
-                    const SizedBox(height: 40.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red.shade200,
-                          ),
-                          onPressed: () {
-                            Navigator.pop(context); // Cierra el modal
-                            setState(() {
-                              widget.toggleTableData;
-                            });
-                          },
-                          child: const Text(
-                            'No enviar',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green.shade200,
-                          ),
-                          onPressed: () async {
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (context) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-
-                            try {
-                              Provider.of<TrainModel>(context, listen: false);
-                              Provider.of<EstacionesProvider>(context,
-                                  listen: false);
-                              final userName = Provider.of<UserProvider>(
-                                  context,
-                                  listen: false);
-                              final user = userName.userName;
-
-                              final trenProvider = Provider.of<TrainModel>(
-                                  context,
-                                  listen: false);
-                              final tren = trenProvider.selectedTrain;
-
-                              final estacionProvider =
-                                  Provider.of<EstacionesProvider>(context,
-                                      listen: false);
-                              final estacion =
-                                  estacionProvider.selectedEstacion;
-
-                              String fechaOfrecido =
-                                  DateFormat("yyyy-MM-ddTHH:mm:ss")
-                                      .format(DateTime.now());
-
-                              await Provider.of<OfrecimientoTrenProvider>(
-                                      context,
-                                      listen: false)
-                                  .ofrecimientoTren(
-                                context: context,
-                                tren: tren!,
-                                ofrecido: 'OK',
-                                ofrecidoPor: user!,
-                                fechaOfrecido: fechaOfrecido,
-                                estacion: estacion!,
-                              );
-
-                              Navigator.pop(context);
-                              Navigator.pop(context);
-                              _refreshTable(context);
-                              // Luego de completar el proceso, refrescar la lista
-                              Provider.of<RechazosProvider>(context,
-                                      listen: false)
-                                  .refreshRechazos(context, user);
-                            } catch (error) {
-                              Navigator.pop(context);
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Error'),
-                                  content: Text(
-                                      'Hubo un problema al actualizar el ofrecimiento: $error'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Enviar'),
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(height: 20.0),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    const Center(
+                                      child: Text(
+                                        'Formación Correcta.',
+                                        style: TextStyle(
+                                          fontSize: 21.0,
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 45.0),
+                                    Center(
+                                      child: Text(
+                                        resultadoMensaje,
+                                        style: const TextStyle(
+                                          fontSize: 22.0,
+                                          color: Colors.black,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
-                              );
-                            }
-                          },
-                          child: const Text(
-                            'Enviar ofrecimiento',
-                            style: TextStyle(color: Colors.black),
-                          ),
+                              ),
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  '¿Deseas envíar el ofrecimiento del tren?',
+                                  style: TextStyle(color: Colors.black, fontSize: 17.0),
+                                ),
+                                const SizedBox(height: 40.0),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red.shade200,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        widget.toggleTableData(); // <- Llamar la función
+                                      },
+                                      child: const Text(
+                                        'No enviar',
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green.shade200,
+                                      ),
+                                      onPressed: () async {
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (context) => const Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        );
+
+                                        try {
+                                          final userName = Provider.of<UserProvider>(context, listen: false);
+                                          final user = userName.userName;
+
+                                          final trenProvider = Provider.of<TrainModel>(context, listen: false);
+                                          final tren = trenProvider.selectedTrain;
+
+                                          final estacionProvider = Provider.of<EstacionesProvider>(context, listen: false);
+                                          final estacion = estacionProvider.selectedEstacion;
+
+                                          String fechaOfrecido = DateFormat("yyyy-MM-ddTHH:mm:ss").format(DateTime.now());
+
+                                          await Provider.of<OfrecimientoTrenProvider>(context, listen: false)
+                                              .ofrecimientoTren(
+                                            context: context,
+                                            tren: tren!,
+                                            ofrecido: 'OK',
+                                            ofrecidoPor: user!,
+                                            fechaOfrecido: fechaOfrecido,
+                                            estacion: estacion!,
+                                          );
+
+                                          Navigator.pop(context); // Cierra el loading
+                                          Navigator.pop(context); // Cierra el modal
+                                          _refreshTable(context);
+
+                                          Provider.of<RechazosProvider>(context, listen: false)
+                                              .refreshRechazos(context, user);
+                                        } catch (error) {
+                                          Navigator.pop(context); // Cierra el loading
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text('Error'),
+                                              content: Text('Hubo un problema al actualizar el ofrecimiento: $error'),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () => Navigator.pop(context),
+                                                  child: const Text('Cerrar'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: const Text(
+                                        'Enviar ofrecimiento',
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ],
-                )
+                  ),
+                ),
               ],
-            ),
-          ),
+            );
+          },
         );
       },
     );

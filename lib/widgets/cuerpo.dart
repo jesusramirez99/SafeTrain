@@ -48,6 +48,7 @@ class CuerpoState extends State<Cuerpo> {
   bool _showInfoTrain = false;
   bool _isLoading = false;
   String _trenYFecha = '';
+  
 
   List<Map<String, dynamic>> _dataTrain = [];
 
@@ -198,7 +199,13 @@ class CuerpoState extends State<Cuerpo> {
 
   @override
   Widget build(BuildContext context) {
+    
     final estacionProvider = Provider.of<EstacionesProvider>(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Breakpoints simples
+    final isLargeScreen = screenWidth > 1800;
+    //final isMediumScreen = screenWidth > 1200 && screenWidth <= 1800;
 
     return Scaffold(
       body: Column(
@@ -227,50 +234,67 @@ class CuerpoState extends State<Cuerpo> {
                     Expanded(
                       child: Row(
                         children: <Widget>[
-                          const SizedBox(width: 110.0),
+                          SizedBox(width: isLargeScreen ? 110.0 : 30.0),
                           textos('Tren'),
-                          const SizedBox(width: 25.0),
+                          SizedBox(width: isLargeScreen ? 25.0 : 15.0),
                           TextFieldIdTrain(
                             focusNode: _focusNode,
                             idTrainController: _idTrainController,
                             isEnabled: !_enabledIdTrain,
                           ),
-                          const SizedBox(width: 40.0),
+                          SizedBox(width: isLargeScreen? 40.0 : 20.0),
                           textos('Fecha'),
                           const SizedBox(width: 1.0),
                           Fecha(
                             fechaController: _fechaController,
                             isEnabled: !_enabledFecha,
                           ),
-                          const SizedBox(width: 40.0),
+                          SizedBox(width: isLargeScreen? 40.0 : 10.0),
                           _dropdownEstacion(context),
-                          const SizedBox(width: 40.0),
-                          iconSearch(),
-                          const SizedBox(width: 25.0),
+                          SizedBox(width: isLargeScreen? 40.0 : 15.0),
+                          iconSearch(context),
+                          SizedBox(width: isLargeScreen? 25.0 : 10.0),
                           const BotonCancelar(),
-                          const SizedBox(width: 50.0),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
+                          SizedBox(width: isLargeScreen? 50.0 : 10.0),
+                          isLargeScreen
+                          ? Expanded(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  _iconCompareConsist(context),
+                                  const SizedBox(width: 20.0),
+                                  iconPrint(context),
+                                  const SizedBox(width: 45.0),
+                                  dateTime(context, "fecha"),
+                                  const SizedBox(width: 10.0),
+                                  const Text(
+                                    '-',
+                                    style: TextStyle(color: Colors.white, fontSize: 17.0),
+                                  ),
+                                  const SizedBox(width: 10.0),
+                                  dateTime(context, "hora  hrs."),
+                                ],
+                              ),
+                            )
+                          : Row(                             
+                                children: [
                                 _iconCompareConsist(context),
-                                const SizedBox(width: 20.0),
+                                const SizedBox(width: 10.0),
                                 iconPrint(context),
-                                const SizedBox(width: 45.0),
+                                SizedBox(width: isLargeScreen ? 20.0 : 10.0),
                                 dateTime(context, "fecha"),
                                 const SizedBox(width: 10.0),
                                 const Text(
                                   '-',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 17.0),
+                                  style: TextStyle(color: Colors.white, fontSize: 17.0),
                                 ),
                                 const SizedBox(width: 10.0),
                                 dateTime(context, "hora  hrs."),
-                              ],
-                            ),
+                                ],
                           ),
-                          const SizedBox(width: 80.0),
+                             
+                          SizedBox(width: isLargeScreen ? 80.0 : 10.0),
                         ],
                       ),
                     ),
@@ -347,7 +371,13 @@ class CuerpoState extends State<Cuerpo> {
   }
 
   // ICONO BUSQUEDA DE TREN
-  Widget iconSearch() {
+  Widget iconSearch(BuildContext context) {
+    /*final provider = Provider.of<HistorialValidacionesProvider>(context);
+    final validationHistory = provider.validationHistory;
+    if(validationHistory.isNotEmpty){
+      validationHistory.clear();
+    }*/
+
     return InkWell(
       onTap: _iconSearchEnable
           ? () {
@@ -551,6 +581,8 @@ class CuerpoState extends State<Cuerpo> {
 
   // WIDGET PARA LA FECHA Y HORA
   Widget dateTime(BuildContext context, String texto) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth > 1800;
     final dateProvider = Provider.of<DateProvider>(context);
 
     String displayText = '';
@@ -563,7 +595,7 @@ class CuerpoState extends State<Cuerpo> {
 
     return Text(
       displayText,
-      style: const TextStyle(fontSize: 17.0, color: Colors.white),
+      style: TextStyle(fontSize: isLargeScreen ? 17.0 : 15.0, color: Colors.white),
     );
   }
 

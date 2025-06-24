@@ -72,6 +72,18 @@ class _IndicatorTrainTableState extends State<IndicatorTrainTable> {
                 padding: const EdgeInsets.all(13.0),
                 child: Center(
                   child: Text(
+                    'Totales de Tren',
+                    style: _titleTables(),
+                  ),
+                ),
+              ),
+              _buildSegment(_indicatorTrain, 0,
+              ['Carros Totales', 'Carros Cargados', 'Carros Vacios', 'Toneladas Totales', 'Longitud Total']),
+              const SizedBox(height: 25.0),
+              Padding(
+                padding: const EdgeInsets.all(13.0),
+                child: Center(
+                  child: Text(
                     'Posición de Locomotoras',
                     style: _titleTables(),
                   ),
@@ -136,7 +148,28 @@ class _IndicatorTrainTableState extends State<IndicatorTrainTable> {
     'Ubicación / Rango Frenos de Aire': 'ubicacion',
     'Lotes Programados': 'lotesProgramados',
     'Lotes en el Tren\nLocomotoras a AFT': 'lotesTren',
-    'Lotes fuera de programa': 'fueraPrograma'
+    'Lotes fuera de programa': 'fueraPrograma',
+    'Carros Totales' : 'carrosTotales',
+    'Carros Cargados' : 'carrosCargados',
+    'Carros Vacios' : 'carrosVacios',
+    'Toneladas Totales' : 'toneladasTotales',
+    'Longitud Total' : 'longitudTotal'
+  };
+
+  final List<String> hintHeaders = [
+    'Carros Totales',
+    'Carros Cargados',
+    'Carros Vacios',
+    'Toneladas Totales',
+    'Longitud Total',
+  ];
+
+  final Map<String, String> headerHints = {
+    'Carros Totales': 'Carros mas locomotoras',
+    'Carros Cargados': 'Carros mas locomotoras',
+    'Carros Vacios': 'Carros mas locomotoras',
+    'Toneladas Totales': 'Carros mas locomotoras',
+    'Longitud Total': 'Carros mas locomotoras',
   };
 
   Widget _buildSegment(
@@ -159,43 +192,72 @@ class _IndicatorTrainTableState extends State<IndicatorTrainTable> {
 
         return DataTable(
           columnSpacing: 0,
-          dataRowHeight: 45.0,
+          dataRowMinHeight: 45.0,
           decoration: _cabeceraTabla(),
           border: TableBorder(
             horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
             verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
           ),
+
           columns: headers.map((header) {
-            return DataColumn(
-              label: Container(
-                width: columnWidth,
-                alignment: Alignment.center,
-                child: Text(
-                  header,
-                  style: _styleText(),
-                  textAlign: TextAlign.center,
-                ),
+            final bool needsHint = hintHeaders.contains(header);
+            final childWidget = Container(
+              width: columnWidth,
+              alignment: Alignment.center,
+              child: Text(
+                header,
+                style: _styleText(),
+                textAlign: TextAlign.center,
               ),
             );
+
+            return DataColumn(
+              label: needsHint
+                  ? Tooltip(
+                      message: headerHints[header] ?? header,
+                      preferBelow: false,
+                      child: childWidget,
+                    )
+                  : childWidget,
+            );
           }).toList(),
+
           rows: rows.asMap().entries.map((entry) {
             int rowIndex = entry.key;
             List<String> rowData = entry.value;
+
             return DataRow(
-              cells: rowData.map((cell) {
+
+              cells: rowData.asMap().entries.map((cellEntry) {
+                int cellIndex = cellEntry.key;
+                String cellValue = cellEntry.value;
+
+                String header = headers[cellIndex];
+                bool hasHint = headerHints.containsKey(header);
+
+                Widget cellContent = Text(
+                  cellValue,
+                  style: _cellTextStyle(),
+                  textAlign: TextAlign.center,
+                );
+
+                if(hasHint){
+                  cellContent = Tooltip(
+                    message: headerHints[header]!,
+                    preferBelow: true,
+                    child: cellContent,
+                  );
+                }
+
                 return DataCell(
                   Container(
                     width: columnWidth,
                     alignment: Alignment.center,
-                    child: Text(
-                      cell,
-                      style: _cellTextStyle(),
-                      textAlign: TextAlign.center,
-                    ),
+                    child: cellContent,
                   ),
                 );
               }).toList(),
-              color: MaterialStateColor.resolveWith((states) =>
+              color: WidgetStateColor.resolveWith((states) =>
                   (segmentIndex + rowIndex) % 2 == 0
                       ? Colors.white
                       : Colors.white),
