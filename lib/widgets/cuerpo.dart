@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:safe_train/modelos/change_notifier_provider.dart';
 import 'package:safe_train/modelos/estaciones_provider.dart';
 import 'package:safe_train/modelos/excel_download_provider.dart';
+import 'package:safe_train/modelos/historico_validacion_trenes_provider.dart';
 import 'package:safe_train/modelos/tablas_tren_provider.dart';
 import 'package:safe_train/modelos/user_provider.dart';
 import 'package:safe_train/widgets/btn_cancelar.dart';
@@ -234,7 +235,7 @@ class CuerpoState extends State<Cuerpo> {
                     Expanded(
                       child: Row(
                         children: <Widget>[
-                          SizedBox(width: isLargeScreen ? 110.0 : 30.0),
+                          SizedBox(width: isLargeScreen ? 110.0 : 40.0),
                           textos('Tren'),
                           SizedBox(width: isLargeScreen ? 25.0 : 15.0),
                           TextFieldIdTrain(
@@ -249,13 +250,13 @@ class CuerpoState extends State<Cuerpo> {
                             fechaController: _fechaController,
                             isEnabled: !_enabledFecha,
                           ),
-                          SizedBox(width: isLargeScreen? 40.0 : 10.0),
+                          SizedBox(width: isLargeScreen? 40.0 : 10.0),    
                           _dropdownEstacion(context),
-                          SizedBox(width: isLargeScreen? 40.0 : 15.0),
+                          SizedBox(width: isLargeScreen? 40.0 : 20.0),
                           iconSearch(context),
-                          SizedBox(width: isLargeScreen? 25.0 : 10.0),
+                          SizedBox(width: isLargeScreen? 25.0 : 20.0),
                           const BotonCancelar(),
-                          SizedBox(width: isLargeScreen? 50.0 : 10.0),
+                          SizedBox(width: isLargeScreen? 50.0 : 60.0),
                           isLargeScreen
                           ? Expanded(
                               child: Row(
@@ -280,9 +281,9 @@ class CuerpoState extends State<Cuerpo> {
                           : Row(                             
                                 children: [
                                 _iconCompareConsist(context),
-                                const SizedBox(width: 10.0),
+                                const SizedBox(width: 15.0),
                                 iconPrint(context),
-                                SizedBox(width: isLargeScreen ? 20.0 : 10.0),
+                                SizedBox(width: isLargeScreen ? 20.0 : 15.0),
                                 dateTime(context, "fecha"),
                                 const SizedBox(width: 10.0),
                                 const Text(
@@ -372,11 +373,11 @@ class CuerpoState extends State<Cuerpo> {
 
   // ICONO BUSQUEDA DE TREN
   Widget iconSearch(BuildContext context) {
-    /*final provider = Provider.of<HistorialValidacionesProvider>(context);
+    final provider = Provider.of<HistorialValidacionesProvider>(context);
     final validationHistory = provider.validationHistory;
     if(validationHistory.isNotEmpty){
       validationHistory.clear();
-    }*/
+    }
 
     return InkWell(
       onTap: _iconSearchEnable

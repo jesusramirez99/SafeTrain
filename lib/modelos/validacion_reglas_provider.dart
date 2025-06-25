@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -92,11 +93,14 @@ class ValidacionReglasProvider extends ChangeNotifier {
 
     } else {
 
-      resultadoMensaje = data['Reglas']['message'] ?? 'Mensaje no disponible';
+      //resultadoMensaje = data['Reglas']['message'] ?? 'Mensaje no disponible';
       if (data['Reglas']['wrapper'].length > 0) {
+        resultadoMensaje = '';
         final reglas = data['Reglas']['wrapper'] as List;
         _processReglas(reglas, soloIncumplidas: true);
         return false;
+      }else{
+        resultadoMensaje = data['Reglas']['message'] ?? 'Mensaje no disponible';
       }
       return false;
     }
