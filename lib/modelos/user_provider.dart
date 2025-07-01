@@ -12,6 +12,21 @@ class UserProvider extends ChangeNotifier {
   }
 }
 
+class RoleProvider extends ChangeNotifier {
+  Map<String, dynamic>? _userData;
+
+  Map<String, dynamic>? get userData => _userData;
+
+  String? get role => _userData?['ROLE']; // Accede a la propiedad 'ROLE'
+
+  void setUserData(Map<String, dynamic> data) {
+    _userData = data;
+    notifyListeners();
+  }
+}
+
+
+
 // PROVIDER PARA OBTENER EL FFCC
 class FfccProvider extends ChangeNotifier {
   String _selectedItem = 'FFCC';

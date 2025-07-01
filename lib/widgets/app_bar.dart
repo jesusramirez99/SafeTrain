@@ -42,10 +42,10 @@ class _CustomAppBarState extends State<CustomAppBar> {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: const Color.fromARGB(255, 64, 63, 61),
-      iconTheme: IconThemeData(
-        color: Colors.grey.shade200,
-        size: 33.0,
-      ),
+        iconTheme: IconThemeData(
+          color: Colors.grey.shade200,
+          size: 33.0,
+        ),
       title: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -151,12 +151,17 @@ class _CustomAppBarState extends State<CustomAppBar> {
       ),
       leading: Builder(
         builder: (BuildContext context) {
+        final roleProvider = context.watch<RoleProvider>();
+        final isAdmin = roleProvider.role == 'Admin';
+        print('Rol: ${roleProvider.role}');
           return IconButton(
             icon: const Icon(Icons.menu),
             tooltip: 'Catálogos',
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+            onPressed: isAdmin
+                ? () {
+                    Scaffold.of(context).openDrawer();
+                  }
+                : null, // null = deshabilitado
           );
         },
       ),

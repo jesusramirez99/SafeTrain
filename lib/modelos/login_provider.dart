@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'user_provider.dart';
 
 class LoginProvider with ChangeNotifier {
   bool _isLoading = false;
@@ -15,7 +17,7 @@ class LoginProvider with ChangeNotifier {
 
   String? get regionPrincipal => _regiones.isNotEmpty ? _regiones.first : null;
 
-  Future<bool> login(String userName, String password) async {
+  Future<bool> login(BuildContext context, String userName, String password) async {
     _isLoading = true;
     _errorMessage = null;
     _userData = null;
@@ -39,6 +41,9 @@ class LoginProvider with ChangeNotifier {
           final regionEstacion = _userData?['regionEstacion'] as List<dynamic>;
           _regiones =
               regionEstacion.map((e) => e['region'] as String).toSet().toList();
+          final wrapper = responseData['result']['wrapper'] as Map<String, dynamic>;
+          // Asigna en el provider
+          Provider.of<RoleProvider>(context, listen: false).setUserData(wrapper);
 
           print('Regiones: $_regiones');
 

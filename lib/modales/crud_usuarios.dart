@@ -119,7 +119,7 @@ class UsuariosState extends State<Usuarios> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           _buildField(
-                                              'Username:', campoUsername()),
+                                              'Usuario:', campoUsername()),
                                           _buildField('Nombre:', campoNombre()),
                                           _buildField('Email @:', campoEmail()),
                                         ],
@@ -443,6 +443,12 @@ class UsuariosState extends State<Usuarios> {
                                 return Chip(
                                   label: Text(estacion),
                                   backgroundColor: Colors.blue.shade100,
+                                  deleteIcon: Icon(Icons.close, color: Colors.red),
+                                  onDeleted: () {
+                                    setState(() {
+                                      estaciones.remove(estacion);
+                                    });
+                                  },
                                 );
                               }).toList(),
                             );
