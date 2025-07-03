@@ -229,7 +229,7 @@ class CuerpoState extends State<Cuerpo> {
                 height: 55.0,
               ),*/
 
-              showFlushbarSupport('El sistema se encuentra en periodo de prueba, en caso de alguna observación en\nla validación favor de enviar el archivo de la formación con sus comentarios a\nomar.ameca@ferromex.mx y luis.aguirre@ferromex.mx', const Color.fromARGB(255, 243, 234, 149)),
+              showFlushbarSupport('En caso de alguna observación en la validación favor de enviar el archivo\nde la formación con sus comentarios a omar.ameca@ferromex.mx y\nluis.aguirre@ferromex.mx', const Color.fromARGB(255, 243, 234, 149)),
               
               /*Expanded(
                 child: Center(
@@ -237,7 +237,7 @@ class CuerpoState extends State<Cuerpo> {
                 ),
               ),*/
 
-              const SizedBox(width: 513.0),
+              const SizedBox(width: 565.0),
 
               Container(
                 child: Center(
