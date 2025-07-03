@@ -198,6 +198,17 @@ class CuerpoState extends State<Cuerpo> {
     ).show(context);
   }
 
+  Widget showFlushbarSupport(String mensaje, Color color) {
+    return Container(
+      color: color,
+      padding: const EdgeInsets.all(10),
+      child: Text(
+        mensaje,
+        style: const TextStyle(fontSize: 15.0, color: Colors.black),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     
@@ -213,17 +224,38 @@ class CuerpoState extends State<Cuerpo> {
         children: <Widget>[
           Row(
             children: <Widget>[
-              const SizedBox(
+              /*const SizedBox(
                 width: 30.0,
                 height: 55.0,
-              ),
-              Expanded(
+              ),*/
+
+              showFlushbarSupport('El sistema se encuentra en periodo de prueba, en caso de alguna observación en\nla validación favor de enviar el archivo de la formación con sus comentarios a\nomar.ameca@ferromex.mx y luis.aguirre@ferromex.mx', const Color.fromARGB(255, 243, 234, 149)),
+              
+              /*Expanded(
+                child: Center(
+                  child: textoListaTrenes('Validación de Trenes'),
+                ),
+              ),*/
+
+              const SizedBox(width: 513.0),
+
+              Container(
                 child: Center(
                   child: textoListaTrenes('Validación de Trenes'),
                 ),
               ),
+
+
+              /*Expanded(
+                child: Center(
+                  child: textoListaTrenes('Validacion de Trenes'),
+                ),
+              )*/
             ],
           ),
+
+
+          
           Center(
             child: Container(
               color: Colors.grey.shade600,
@@ -256,7 +288,7 @@ class CuerpoState extends State<Cuerpo> {
                           iconSearch(context),
                           SizedBox(width: isLargeScreen? 25.0 : 20.0),
                           const BotonCancelar(),
-                          SizedBox(width: isLargeScreen? 50.0 : 60.0),
+                          SizedBox(width: isLargeScreen? 50.0 : 80.0),
                           isLargeScreen
                           ? Expanded(
                               child: Row(

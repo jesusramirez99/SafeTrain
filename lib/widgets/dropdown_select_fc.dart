@@ -41,6 +41,7 @@ class _DropdownFCState extends State<DropdownFC> {
               'Copyright © 2025  |  Digital GMXT® ',
               style: TextStyle(color: Colors.white, fontSize: 10.0),
             ),
+            const SizedBox(height: 10.0),
           ],
         ),
       ),
