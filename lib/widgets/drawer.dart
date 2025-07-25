@@ -1,10 +1,10 @@
-import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:safe_train/modales/crud_carros_abiertos.dart';
 import 'package:safe_train/modales/crud_carros_tender.dart';
 import 'package:safe_train/modales/crud_reglas.dart';
 import 'package:safe_train/modales/crud_stcc.dart';
 import 'package:safe_train/modales/crud_usuarios.dart';
+import 'package:safe_train/modales/export_consist.dart';
 import 'package:safe_train/modales/tabla_carros_abiertos.dart';
 import 'package:safe_train/modales/tabla_carros_tender.dart';
 import 'package:safe_train/modales/tabla_distritos.dart';
@@ -265,6 +265,38 @@ class _CustomDrawerState extends State<CustomDrawer> {
     );
   }
 
+  Widget opcionExportar(BuildContext context) {
+    bool isHovering = false;
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Column(
+          children: [
+            MouseRegion(
+              onEnter: (_) => setState(() => isHovering = true),
+              onExit: (_) => setState(() => isHovering = false),
+              child: Material(
+                color: isHovering ? Colors.grey.shade200 : Colors.grey.shade100,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5 ),
+                ),
+                child: ListTile(
+                  leading: const Icon(Icons.upload_file),
+                  title: const Text(
+                    'Cargar consist',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  onTap: () {
+                    ExportDialogState().mdlExportConsist(context);
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget listElements() {
     return Column(
       children: [
@@ -279,6 +311,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
         opcionesReglas(),
         const Divider(),
         opcionesUsuarios(),
+        const Divider(),
+        opcionExportar(context),
         const Divider(),
       ],
     );
