@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:safe_train/modelos/cars_open_provider.dart';
 import 'package:safe_train/modelos/cars_tender_provider.dart';
@@ -24,6 +25,7 @@ import 'package:safe_train/modelos/validacion_reglas_provider.dart';
 import 'package:safe_train/pages/home/home_page.dart';
 import 'package:safe_train/pages/login/login_page.dart';
 import 'package:safe_train/pages/ffccpage/select_ffcc_page.dart';
+import 'package:safe_train/modelos/export_consist_provider.dart';
 
 void main() {
   runApp(
@@ -55,6 +57,7 @@ void main() {
         ChangeNotifierProvider(
             create: (context) => ReglasIncumplidasTrenProvider()),
         ChangeNotifierProvider(create: (context) => ExcelDownloadProvider()),
+        ChangeNotifierProvider(create: (context) => ExportConsistProvider()),
         ChangeNotifierProvider(create: (context) => AutorizadoProvider()),
         ChangeNotifierProvider(create: (context) => RechazosProvider()),
         ChangeNotifierProvider(create: (context) => MotivosRechazo()),

@@ -286,7 +286,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   onTap: () {
-                    ExportDialogState().mdlExportConsist(context);
+                    showExportDialog(context);
                   },
                 ),
               ),
