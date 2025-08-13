@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:web/web.dart' as web;
 
 class RechazosProvider extends ChangeNotifier {
   List<String> _trenesOfrecidos = [];
@@ -46,7 +49,18 @@ class RechazosProvider extends ChangeNotifier {
                   ?.map((e) => e.toString()) // Convertir a String por seguridad
                   .toList();
 
-          _trenesOfrecidos = trenes ?? [];
+        final listaAnterior = List<String>.from(_trenesOfrecidos);
+        _trenesOfrecidos = trenes ?? [];
+        final bool hayNuevos = _trenesOfrecidos.any((tren) => !listaAnterior.contains(tren),
+        );
+
+        if (hayNuevos && _trenesOfrecidos.isNotEmpty) {
+          _mostrarNotificacionNavegador(
+            "Tren Seguro",
+            "Tienes ${_trenesOfrecidos.length} tren(es) rechazado(s)"
+          );
+        }
+
         } else {
           _trenesOfrecidos = [];
           _errorMessage = 'No hay trenes rechazados disponibles';
@@ -64,6 +78,21 @@ class RechazosProvider extends ChangeNotifier {
 
   void refreshRechazos(BuildContext context, String user) {
     fetchRechazos(context, user);
+  }
+
+  void _mostrarNotificacionNavegador(String titulo, String mensaje) {
+    final permiso = (web.Notification.permission as JSString).toDart;
+
+    if (permiso == 'granted') {
+      web.Notification(titulo, web.NotificationOptions(body: mensaje));
+    } else {
+      web.Notification.requestPermission().toDart.then((permisoJS) {
+        final permisoGranted = permisoJS.toDart;
+        if (permisoGranted == 'granted') {
+          web.Notification(titulo, web.NotificationOptions(body: mensaje));
+        }
+      });
+    }
   }
 
   @override
