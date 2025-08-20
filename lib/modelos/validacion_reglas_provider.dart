@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train/config/environment.dart';
 
 class ValidacionReglasProvider extends ChangeNotifier {
   List<Map<String, dynamic>> reglasIncumplidas = [];
@@ -19,7 +20,7 @@ class ValidacionReglasProvider extends ChangeNotifier {
     String estacionActual,
   ) async {
     final url =
-        Uri.parse('http://10.10.76.150/TrenSeguroDev/api/ValidarReglas');
+        Uri.parse('${Enviroment.baseUrl}/ValidarReglas');
 
     _setLoadingState(true);
     _resetState();

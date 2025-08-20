@@ -26,8 +26,6 @@ class DataTrainTable extends StatefulWidget {
   @override
   State<DataTrainTable> createState() => _DataTrainTableState();
 
-  
-
 }
 
 class _DataTrainTableState extends State<DataTrainTable> {
@@ -54,36 +52,237 @@ class _DataTrainTableState extends State<DataTrainTable> {
     final screenWidth = MediaQuery.of(context).size.width;
     final ScrollController _horizontalScrollController = ScrollController();
     final isLargeScreen = screenWidth > 1800;
-    final rowSelected = Provider.of<SelectionNotifier>(context);
+    //final rowSelected = Provider.of<SelectionNotifier>(context);
     final providerDataTrain = Provider.of<TablesTrainsProvider>(context);
-    final trainModel = Provider.of<TrainModel>(context, listen: false);
+    /*final trainModel = Provider.of<TrainModel>(context, listen: false);
     final estacion = Provider.of<EstacionesProvider>(context, listen: false);
+    final trainData = providerDataTrain.firstTrain;*/
+    print(providerDataTrain.trainData);
 
     return SizedBox(
       width: isLargeScreen? MediaQuery.of(context).size.width * 0.8 : MediaQuery.of(context).size.width * 0.8,
       height: isLargeScreen? MediaQuery.of(context).size.height * 0.7 : MediaQuery.of(context).size.height * 0.6,
-      child: providerDataTrain.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
+      child: providerDataTrain.isLoading ? const Center(child: CircularProgressIndicator()) : providerDataTrain.trainData? _buildTableDataTrain() : _buildTableStatusTrainsOffered()
+          
+    );
+  }
+
+  //Tabla de trenes ofrecidos
+  Widget _buildTableStatusTrainsOffered(){
+    final screenWidth = MediaQuery.of(context).size.width;
+    final ScrollController _horizontalScrollController = ScrollController();
+    final isLargeScreen = screenWidth > 1800;
+    final rowSelected = Provider.of<SelectionNotifier>(context);
+    final providerDataTrain = Provider.of<TablesTrainsProvider>(context);
+    final trainModel = Provider.of<TrainModel>(context, listen: false);
+    final estacion = Provider.of<EstacionesProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final user = userProvider.userName ?? '';
+    //providerDataTrain.tableTrainsOffered(context, user);
+    return ListView(
+              children: [
+                const Padding (
+                  padding: EdgeInsets.all(12.0),
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Estatus Trenes Ofrecidos',
+                          style: TextStyle(
+                            fontSize: 22.0,
+                            color: Colors.black,
+                            decoration: TextDecoration.underline
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                isLargeScreen ? 
+                DataTable(
+                    dataRowHeight: 65.0,
+                    decoration: _cabeceraTabla(),
+                    columns: _buildColumnsTrainStatusTrainsOffered(),
+                    rows: List<DataRow>.generate(
+                      providerDataTrain.dataTrain.length,
+                      (index) => DataRow(
+                        selected: index == _selectedRowIndex,
+                        onSelectChanged: (isSelected) {
+                          setState(() {
+                            if (isSelected != null && isSelected) {
+                              _selectedRowIndex = index;
+                              _selectedTrain = providerDataTrain.dataTrainsOffered[index]['IdTren'].toString();
+                              _selectedEstation = providerDataTrain.dataTrainsOffered[index]['estacion_actual'].toString();
+
+                              print('Fila seleccionada: $_selectedRowIndex');
+                              print('Estacion: $_selectedEstation');
+                              print('Tren: $_selectedTrain');
+
+                              trainModel.setSelectedTrain(_selectedTrain);
+                              estacion.updateSelectedEstacion(_selectedEstation);
+                              rowSelected.updateSelectedRow(index);
+                            } else {
+                              _selectedRowIndex = -1;
+                              _selectedTrain = '';
+                              rowSelected.updateSelectedRow(null);
+                              print('Fila deseleccionada: $_selectedRowIndex');
+                              print('Tren: $_selectedTrain');
+                            }
+                          });
+                        },
+                        color: WidgetStateColor.resolveWith(
+                          (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.selected)) {
+                              return const Color.fromARGB(255, 226, 237, 247);
+                            } else {
+                              return index % 2 == 0 ? Colors.white : Colors.white;
+                            }
+                          },
+                        ),
+                        cells: _buildCellsTrainStatusTrainsOffered(providerDataTrain.dataTrainsOffered[index]),
+                      ),
+                    ),
+                    border: TableBorder(
+                      horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+                      verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+                    ),
+                  )
+
+                
+                :
+                
+                ScrollbarTheme(
+                  data: ScrollbarThemeData(
+                      thumbColor: WidgetStateProperty.all<Color>(Colors.grey), // color del pulgar
+                      trackColor: WidgetStateProperty.all<Color>(Colors.grey.shade300), // fondo del track
+                      trackBorderColor: WidgetStateProperty.all<Color>(Colors.grey.shade400), // borde del track
+                      radius: const Radius.circular(8), // borde redondeado del thumb
+                      thickness: WidgetStateProperty.all<double>(8.0), // grosor del thumb
+                    ), 
+                        child: Scrollbar(
+                          thumbVisibility: true,
+                          trackVisibility: true,
+                          controller: _horizontalScrollController,
+                          child: SingleChildScrollView(
+                            controller: _horizontalScrollController,
+                            scrollDirection: Axis.horizontal,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 10.0),
+                              child: DataTable(
+                                columnSpacing: 10.0,
+                                dataRowHeight: 50.0,
+                                decoration: _cabeceraTabla(),
+                                columns: _buildColumnsTrainStatusTrainsOffered(),
+                                rows: List<DataRow>.generate(
+                                  providerDataTrain.dataTrain.length,
+                                  (index) => DataRow(
+                                    selected: index == _selectedRowIndex,
+                                    onSelectChanged: (isSelected) {
+                                      setState(() {
+                                        if (isSelected != null && isSelected) {
+                                          _selectedRowIndex = index;
+                                          _selectedTrain = providerDataTrain.dataTrainsOffered[index]['IdTren'].toString();
+                                          _selectedEstation = providerDataTrain.dataTrainsOffered[index]['estacion_actual'].toString();
+
+                                          print('Fila seleccionada: $_selectedRowIndex');
+                                          print('Estacion: $_selectedEstation');
+                                          print('Tren: $_selectedTrain');
+
+                                          trainModel.setSelectedTrain(_selectedTrain);
+                                          estacion.updateSelectedEstacion(_selectedEstation);
+                                          rowSelected.updateSelectedRow(index);
+                                        } else {
+                                          _selectedRowIndex = -1;
+                                          _selectedTrain = '';
+                                          rowSelected.updateSelectedRow(null);
+                                          print('Fila deseleccionada: $_selectedRowIndex');
+                                          print('Tren: $_selectedTrain');
+                                        }
+                                      });
+                                    },
+                                    color: MaterialStateColor.resolveWith(
+                                      (Set<MaterialState> states) {
+                                        if (states.contains(MaterialState.selected)) {
+                                          return const Color.fromARGB(255, 226, 237, 247);
+                                        } else {
+                                          return index % 2 == 0 ? Colors.white : Colors.white;
+                                        }
+                                      },
+                                    ),
+                                    cells: _buildCellsTrainStatusTrainsOffered(providerDataTrain.dataTrainsOffered[index]),
+                                  ),
+                                ),
+                                border: TableBorder(
+                                  horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+                                  verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+                                ),
+                              ),
+                            )
+                        ),
+                      ),
+                ),
+              ],
+    );
+  }
+
+
+  //Tabla de datos de tren
+  Widget _buildTableDataTrain(){   
+    final screenWidth = MediaQuery.of(context).size.width;
+    final ScrollController _horizontalScrollController = ScrollController();
+    final isLargeScreen = screenWidth > 1800;
+    final rowSelected = Provider.of<SelectionNotifier>(context);
+    final providerDataTrain = Provider.of<TablesTrainsProvider>(context);
+    final trainModel = Provider.of<TrainModel>(context, listen: false);
+    final estacion = Provider.of<EstacionesProvider>(context, listen: false);
+    final trainData = providerDataTrain.firstTrain;  
+      //Widget de tabla de Datos de tren y responsivo
+          return ListView(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Center(
-                    child: Text(
-                      'Datos del Tren',
-                      style: TextStyle(
-                        fontSize: 22.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade500,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Datos del Tren: ${trainData?['IdTren'] ?? ''}',
+                          style: TextStyle(
+                            fontSize: 22.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                        const SizedBox(width: 100),
+                        Text(
+                          'Estación Origen: ${trainData?['origen'] ?? ''}',
+                          style: TextStyle(
+                            fontSize: 22.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                        const SizedBox(width: 100),
+                        Text(
+                          'Estación Destino: ${trainData?['destino'] ?? ''}',
+                          style: TextStyle(
+                            fontSize: 22.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
 
                 isLargeScreen
-                ? DataTable(
-                    columnSpacing: 10.0,
-                    dataRowHeight: 50.0,
+                ?
+                //TABLA DE DATOS DE TREN
+                DataTable(
+                    dataRowHeight: 65.0,
                     decoration: _cabeceraTabla(),
                     columns: _buildColumns(),
                     rows: List<DataRow>.generate(
@@ -129,7 +328,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
                       horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
                       verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
                     ),
-                  ) :
+                  )
+
+                   :
 
                   ScrollbarTheme(
                     data: ScrollbarThemeData(
@@ -202,33 +403,53 @@ class _DataTrainTableState extends State<DataTrainTable> {
                       ),
                   ),
               ],
-            ),
-    );
+            );
   }
 
-  List<DataColumn> _buildColumns() {
+
+  List<DataColumn> _buildColumnsTrainStatusTrainsOffered(){
     return [
-      //DataColumn(label: _buildHeaderCell('Tren')),
-      DataColumn(label: _buildHeaderCell('Estación\nOrigen')),
-      DataColumn(label: _buildHeaderCell('Estación\nDestino')),
-      //DataColumn(label: _buildHeaderCell('Estación\nActual')),
-      DataColumn(label: _buildHeaderCell('Total\nCarros')),
-      DataColumn(label: _buildHeaderCell('Cargados')),
-      DataColumn(label: _buildHeaderCell('Vacíos')),
+      DataColumn(label: _buildHeaderCell('Tren')),
+      DataColumn(label: _buildHeaderCell('Estación\nActual')),
+      DataColumn(label: _buildHeaderCell('Carros')),
       DataColumn(label: _buildHeaderCell('Validado')),
       DataColumn(label: _buildHeaderCell('Fecha\nValidado')),
-      DataColumn(label: _buildHeaderCell('Ofrecido\npor')),
       DataColumn(label: _buildHeaderCell('Fecha\nOfrecido')),
       DataColumn(label: _buildHeaderCell('Estatus\nCCO')),
-      DataColumn(label: _buildHeaderCell('Fecha\nAutorizado / Rechazado')),
-      DataColumn(label: _buildHeaderCell('Autorizado')),
+      DataColumn(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado')),
+      DataColumn(label: _buildHeaderCell('Estatus\nDespacho')),
+      DataColumn(label: _buildHeaderCell('Fecha Despacho\nAutorizado/Rechazado')),
       DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
       DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
       DataColumn(label: _buildHeaderCell('Llamada\nCompletada'))
     ];
   }
 
-  List<DataCell> _buildCells(Map<String, dynamic> data) {
+  List<DataColumn> _buildColumns() {
+    return [
+      //DataColumn(label: _buildHeaderCell('Tren')),
+      //DataColumn(label: _buildHeaderCell('Estación\nOrigen')),
+      //DataColumn(label: _buildHeaderCell('Estación\nDestino')),
+      DataColumn(label: _buildHeaderCell('Estación\nActual')),
+      DataColumn(label: _buildHeaderCell('Carros')),
+      //DataColumn(label: _buildHeaderCell('Cargados')),
+      //DataColumn(label: _buildHeaderCell('Vacíos')),
+      DataColumn(label: _buildHeaderCell('Validado')),
+      DataColumn(label: _buildHeaderCell('Fecha\nValidado')),
+      //DataColumn(label: _buildHeaderCell('Ofrecido\npor')),
+      DataColumn(label: _buildHeaderCell('Fecha\nOfrecido')),
+      DataColumn(label: _buildHeaderCell('Estatus\nCCO')),
+      DataColumn(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado')),
+      //DataColumn(label: _buildHeaderCell('Autorizado')),
+      DataColumn(label: _buildHeaderCell('Estatus\nDespacho')),
+      DataColumn(label: _buildHeaderCell('Fecha Despacho\nAutorizado/Rechazado')),
+      DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
+      DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
+      DataColumn(label: _buildHeaderCell('Llamada\nCompletada'))
+    ];
+  }
+
+  List<DataCell> _buildCellsTrainStatusTrainsOffered(Map<String, dynamic> data){
     Provider.of<TablesTrainsProvider>(context);
     Provider.of<TrainModel>(context, listen: false);
 
@@ -267,15 +488,15 @@ class _DataTrainTableState extends State<DataTrainTable> {
       }
     }
 
-    // Construir la lista de celdas
     return [
-      //_buildCell(data['IdTren']?.toString() ?? '', Colors.black),
-      _buildCell(data['origen']?.toString() ?? '', Colors.black),
-      _buildCell(data['destino']?.toString() ?? '', Colors.black),
-      //_buildCell(data['estacion_actual']?.toString() ?? '', Colors.black),
-      _buildCell(data['carros']?.toString() ?? '', Colors.black),
-      _buildCell(data['cargados']?.toString() ?? '', Colors.black),
-      _buildCell(data['vacios']?.toString() ?? '', Colors.black),
+      _buildCell(data['IdTren']?.toString() ?? '', Colors.black),
+      _buildCell(data['estacion_actual']?.toString() ?? '', Colors.black),
+      _buildCell(
+        '${'Cargados'.padRight(15)}${data['cargados'] ?? ''}\n'
+        '${'Vacios'.padRight(18)}${data['vacios'] ?? ''}\n'
+        '${'Total'.padRight(20)}${data['carros'] ?? ''}\n',
+        Colors.black,
+      ),
 
       // Validado
       _buildValidatedCell(
@@ -283,6 +504,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
           data['autorizado']?.toString() ?? '',
           data['ofrecido_por']?.toString() ?? ''),
 
+    
       // Fecha Vaidado
       DataCell(
         formattedDateCell(
@@ -291,11 +513,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
         ),
       ),
 
-      // Ofrecido Por
-      _buildCell(data['ofrecido_por']?.toString() ?? '', Colors.black),
-
       // Fecha Ofrecido
-
       DataCell(
         Center(
           child: data['ofrecido_por'] == ''
@@ -319,18 +537,180 @@ class _DataTrainTableState extends State<DataTrainTable> {
         formattedDateCell(
           date: data['fecha_autorizado']?.toString() ?? '',
           format: 'dd/MM/yyyy \n HH:mm',
-          textColor:
-              data['autorizado'] == 'Autorizado' ? Colors.green : Colors.red,
+        ),
+      ),
+
+
+      //Estatus Despacho y Fecha Despacho
+      _buildCell(data['autorizado']?.toString() ?? '', Colors.black),
+
+
+      _buildCell(data['fecha_autorizado']?.toString() ?? '', Colors.black),
+      
+      // Fecha Envio de Llamado
+      DataCell(
+        Center(
+          child: data['autorizado'] == 'Rechazado'
+              ? const SizedBox() // Celda vacía si está rechazado
+              : formattedDateCell(
+                  date: data['fecha_autorizado']?.toString() ?? '',
+                  format: 'dd/MM/yyyy \n HH:mm',
+                ),
+        ),
+      ),
+
+      // Fecha Llamado
+      DataCell(
+        Center(
+          child: data['autorizado'] == 'Rechazado'
+              ? const SizedBox()
+              : formattedDateCell(
+                  date: data['fecha_llamado']?.toString() ?? '',
+                  format: 'dd/MM/yyyy \n HH:mm',
+                ),
+        ),
+      ),
+
+      // Fecha llamada completada
+      DataCell(
+        formattedDateCell(
+          date: data['fecha_llamado']?.toString() ?? '',
+          format: 'dd/MM/yyyy \n HH:mm:ss',
+        ),
+      ),
+    ];    
+  }
+
+
+
+  //CELDA PARA TABLA DE INFORMACION DE TREN
+  List<DataCell> _buildCells(Map<String, dynamic> data) {
+    Provider.of<TablesTrainsProvider>(context);
+    Provider.of<TrainModel>(context, listen: false);
+
+    // FORMATEO DE LA FECHA
+    Widget formattedDateCell({
+      required String date,
+      String format = 'dd/MM/yyyy \n HH:mm',
+      Color textColor = Colors.black,
+    }) {
+      if (date.isEmpty) {
+        return const Text('');
+      }
+
+      try {
+        // Parsear la fecha y formatearla
+        DateTime dateTime = DateTime.parse(date);
+        String formattedDate = DateFormat(format).format(dateTime);
+
+        return Center(
+          child: Text(
+            formattedDate,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        );
+      } catch (e) {
+        return Center(
+          child: Text(
+            date,
+            style: const TextStyle(color: Colors.red),
+          ),
+        );
+      }
+    }
+
+    // Construir la lista de celdas
+    return [
+      //_buildCell(data['IdTren']?.toString() ?? '', Colors.black),
+      //_buildCell(data['origen']?.toString() ?? '', Colors.black),
+      //_buildCell(data['destino']?.toString() ?? '', Colors.black),
+      _buildCell(data['estacion_actual']?.toString() ?? '', Colors.black),
+      //_buildCell(data['carros']?.toString() ?? '', Colors.black),
+      //_buildCell(data['cargados']?.toString() ?? '', Colors.black),
+      //_buildCell(data['vacios']?.toString() ?? '', Colors.black),
+      _buildCell(
+        '${'Cargados'.padRight(15)}${data['cargados'] ?? ''}\n'
+        '${'Vacios'.padRight(18)}${data['vacios'] ?? ''}\n'
+        '${'Total'.padRight(20)}${data['carros'] ?? ''}\n',
+        Colors.black,
+      ),
+
+
+
+
+      // Validado
+      _buildValidatedCell(
+          data['validado']?.toString() ?? '',
+          data['autorizado']?.toString() ?? '',
+          data['ofrecido_por']?.toString() ?? ''),
+
+      // Fecha Vaidado
+      DataCell(
+        formattedDateCell(
+          date: data['fecha_validado']?.toString() ?? '',
+          format: 'dd/MM/yyyy \n HH:mm',
+        ),
+      ),
+
+      // Ofrecido Por
+      //_buildCell(data['ofrecido_por']?.toString() ?? '', Colors.black),
+
+      // Fecha Ofrecido
+      DataCell(
+        Center(
+          child: data['ofrecido_por'] == ''
+              ? const SizedBox() // Celda vacía si no hay nada en la celda
+              : formattedDateCell(
+                  date: data['fecha_ofrecido']?.toString() ?? '',
+                  format: 'dd/MM/yyyy \n HH:mm',
+                ),
+        ),
+      ),
+
+      // Estatus CCO - Autorizado / Rechazado
+      _buildStatusCell(
+        data['autorizado']?.toString() ?? 'Autorizado',
+        data['autorizado'] == 'Autorizado' ? Colors.green : Colors.red,
+        context,
+      ),
+
+      // Fecha Autorizado / Rechazado
+      DataCell(
+        formattedDateCell(
+          date: data['fecha_autorizado']?.toString() ?? '',
+          format: 'dd/MM/yyyy \n HH:mm',
+          /*textColor:
+              data['autorizado'] == 'Autorizado' ? Colors.green : Colors.red,*/
         ),
       ),
 
       // Autorizado
-      _buildCell(
+      /*_buildCell(
         data['autorizado'] == 'Rechazado'
             ? ''
             : data['llamado_por']?.toString() ?? '',
-        Colors.black, // Aquí puedes colocar el color que necesites
+        Colors.black, 
+      ),*/
+
+      //Estatus Despacho y Fecha Despacho
+       _buildStatusCell(
+        data['autorizado']?.toString() ?? 'Autorizado',
+        data['autorizado'] == 'Autorizado' ? Colors.green : Colors.red,
+        context,
       ),
+
+      DataCell(
+        formattedDateCell(
+          date: data['fecha_autorizado']?.toString() ?? '',
+          format: 'dd/MM/yyyy \n HH:mm',
+        ),
+      ),
+      
 
       // Fecha Envio de Llamado
       DataCell(
@@ -415,7 +795,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
             fontWeight: FontWeight.bold,
             color: textColor,
           ),
-          textAlign: TextAlign.center,
+          textAlign: TextAlign.start,
         ),
       ),
     );
@@ -454,7 +834,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
                 color: textColor,
                 decoration: text == 'Rechazado'
                     ? TextDecoration.underline
-                    : null, // Opcional: subrayado
+                    : null,
+                decorationColor: text == 'Rechazado'? Colors.red : null, // Opcional: subrayado
               ),
               textAlign: TextAlign.center,
             ),

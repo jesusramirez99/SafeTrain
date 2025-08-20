@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train/config/environment.dart';
 
 class EstacionesProvider with ChangeNotifier {
   List<Map<String, dynamic>> _estaciones = [];
@@ -10,7 +11,7 @@ class EstacionesProvider with ChangeNotifier {
   // FUNCION PARA MOSTRAR LAS ESTACIONES
   Future<void> fetchEstaciones() async {
     final url =
-        Uri.parse('http://10.10.76.150/TrenSeguroDev/api/getEstaciones');
+        Uri.parse('${Enviroment.baseUrl}/getEstaciones');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {

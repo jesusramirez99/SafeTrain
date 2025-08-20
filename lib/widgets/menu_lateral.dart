@@ -555,6 +555,8 @@ class MenuLateralState extends State<MenuLateral> {
                                           final estacion = estacionProvider.selectedEstacion;
 
                                           String fechaOfrecido = DateFormat("yyyy-MM-ddTHH:mm:ss").format(DateTime.now());
+                                          print(tren);
+                                          
 
                                           await Provider.of<OfrecimientoTrenProvider>(context, listen: false)
                                               .ofrecimientoTren(

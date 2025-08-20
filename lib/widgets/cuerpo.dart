@@ -295,7 +295,7 @@ class CuerpoState extends State<Cuerpo> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  _iconCompareConsist(context),
+                                  //_iconCompareConsist(context),
                                   const SizedBox(width: 20.0),
                                   iconPrint(context),
                                   const SizedBox(width: 45.0),
@@ -312,7 +312,7 @@ class CuerpoState extends State<Cuerpo> {
                             )
                           : Row(                             
                                 children: [
-                                _iconCompareConsist(context),
+                                //_iconCompareConsist(context),
                                 const SizedBox(width: 15.0),
                                 iconPrint(context),
                                 SizedBox(width: isLargeScreen ? 20.0 : 15.0),

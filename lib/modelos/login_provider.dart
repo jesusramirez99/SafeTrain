@@ -1,7 +1,10 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:safe_train/config/environment.dart';
+
 import 'user_provider.dart';
 
 class LoginProvider with ChangeNotifier {
@@ -26,7 +29,7 @@ class LoginProvider with ChangeNotifier {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.10.76.150/TrenSeguroDev/api/getLoginCCO'),
+        Uri.parse('${Enviroment.baseUrl}/getLoginCCO'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'USER_NAME': userName, 'PASSWORD': password}),
       );

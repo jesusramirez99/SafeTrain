@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:safe_train/config/environment.dart';
 
 class STCCProvider with ChangeNotifier {
   List<Map<String, dynamic>> _stcc = [];
@@ -16,7 +18,7 @@ class STCCProvider with ChangeNotifier {
       int estatus) async {
     _isLoading = true;
     notifyListeners();
-    String url = 'http://10.10.76.150/TrenSeguro/api/saveSTCC';
+    String url = '${Enviroment.baseUrl}/saveSTCC';
 
     try {
       final response = await http.post(
@@ -60,7 +62,7 @@ class STCCProvider with ChangeNotifier {
 
     try {
       final response = await http
-          .get(Uri.parse('http://10.10.76.150/TrenSeguro/api/getSTCC'));
+          .get(Uri.parse('${Enviroment.baseUrl}/getSTCC'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         _stcc = List<Map<String, dynamic>>.from(data['STCC']);
@@ -79,7 +81,7 @@ class STCCProvider with ChangeNotifier {
   // Método para cambiar el estado de un STCC (Activo/Inactivo)
   Future<void> actualizarSTCC(int id, int newStatus) async {
     final url =
-        Uri.parse('http://10.10.76.150/TrenSeguro/api/activoInactivoSTCC');
+        Uri.parse('${Enviroment.baseUrl}/activoInactivoSTCC');
 
     try {
       final response = await http.put(

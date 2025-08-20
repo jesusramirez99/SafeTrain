@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train/config/environment.dart';
 import 'dart:convert';
 
 import 'package:safe_train/modales/crud_carros_abiertos.dart';
@@ -19,7 +20,7 @@ class CarsOpenProvider with ChangeNotifier {
 
     try {
       final response = await http.get(
-          Uri.parse('http://10.10.76.150/TrenSeguro/api/getCarrosAbiertos'));
+          Uri.parse('${Enviroment.baseUrl}/getCarrosAbiertos'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         _carrosAbiertos = List<Map<String, dynamic>>.from(data['show_cars']);
@@ -49,7 +50,7 @@ class CarsOpenProvider with ChangeNotifier {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.10.76.150/TrenSeguro/api/saveCarrosAbiertos'),
+        Uri.parse('${Enviroment.baseUrl}/saveCarrosAbiertos'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'name_car': carro,
@@ -89,7 +90,7 @@ class CarsOpenProvider with ChangeNotifier {
   Future<void> estatusCarrosAbiertos(
       int idCarOpen, String user, String date, int newStatus) async {
     final url =
-        Uri.parse('http://10.10.76.150/TrenSeguro/api/updateCarrosAbiertos');
+        Uri.parse('${Enviroment.baseUrl}/updateCarrosAbiertos');
 
     try {
       final response = await http.put(

@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train/config/environment.dart';
 import 'package:safe_train/modelos/reglas_incumplidas_tren_modelo.dart';
 
 // Proveedor para manejar los datos de las reglas incumplidas
@@ -20,7 +22,7 @@ class ReglasIncumplidasTrenProvider with ChangeNotifier {
     notifyListeners();
 
     final url =
-        'http://10.10.76.150/TrenSeguroDev/api/getReglaIncumplidaTren?idTren=$idTren&estacion=$estacion';
+        '${Enviroment.baseUrl}/getReglaIncumplidaTren?idTren=$idTren&estacion=$estacion';
 
     try {
       final response = await http.get(Uri.parse(url));

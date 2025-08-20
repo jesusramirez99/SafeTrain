@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:safe_train/config/environment.dart';
+
 // PROVIDER PARA MOSTRAR LOS CARROS TENDER
 class TenderProvider with ChangeNotifier {
   List<Map<String, dynamic>> _carrosTender = [];
@@ -17,7 +19,7 @@ class TenderProvider with ChangeNotifier {
 
     try {
       final response = await http
-          .get(Uri.parse('http://10.10.76.150/TrenSeguro/api/getCarrosTender'));
+          .get(Uri.parse('${Enviroment.baseUrl}/getCarrosTender'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         _carrosTender = List<Map<String, dynamic>>.from(data['CarrosTender']);
@@ -47,7 +49,7 @@ class TenderProvider with ChangeNotifier {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.10.76.150/TrenSeguro/api/saveCarrosTender'),
+        Uri.parse('${Enviroment.baseUrl}/saveCarrosTender'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'name_car': carro,
@@ -87,7 +89,7 @@ class TenderProvider with ChangeNotifier {
   Future<void> actualizarTender(
       int idTender, String user, String date, int newStatus) async {
     final url =
-        Uri.parse('http://10.10.76.150/TrenSeguro/api/updateCarrosTender');
+        Uri.parse('${Enviroment.baseUrl}/updateCarrosTender');
 
     try {
       final response = await http.put(

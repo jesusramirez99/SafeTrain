@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train/config/environment.dart';
 
 class ExportConsistProvider with ChangeNotifier {
   String? _errorMessage;
@@ -13,7 +14,7 @@ class ExportConsistProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final uri = Uri.parse('http://10.10.76.150/TrenSeguroDev/api/upload-excel');
+      final uri = Uri.parse('${Enviroment.baseUrl}/upload-excel');
 
       final request = http.MultipartRequest('POST', uri)
         ..fields['tipo'] = tipo

@@ -1,22 +1,29 @@
 import 'dart:async';
+import 'dart:convert';
+
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:another_flushbar/flushbar.dart';
 import 'package:provider/provider.dart';
+import 'package:safe_train/config/environment.dart';
 import 'package:safe_train/modelos/estaciones_provider.dart';
 import 'package:safe_train/modelos/historico_validacion_trenes_provider.dart';
 
 class TablesTrainsProvider with ChangeNotifier {
   bool _isLoading = false;
+  bool _trainData = false;
   List<Map<String, dynamic>> _dataTrain = [];
   List<Map<String, dynamic>> _infoTrain = [];
+  List<Map<String, dynamic>> _dataTrainsOffered = [];
   String? _selectedID;
   int id = 0;
 
   String? get selectedID => _selectedID;
   bool get isLoading => _isLoading;
+  bool get trainData => _trainData;
   List<Map<String, dynamic>> get dataTrain => _dataTrain;
+  List<Map<String, dynamic>> get dataTrainsOffered => _dataTrainsOffered;
+  Map<String, dynamic>? get firstTrain => _dataTrain.isNotEmpty ? _dataTrain.first : null;
 
   int _rowsPerPage = 10;
   List<Map<String, dynamic>> get infoTrain => _infoTrain;
@@ -36,6 +43,7 @@ class TablesTrainsProvider with ChangeNotifier {
 
   void clearData() {
     _dataTrain = [];
+    _trainData = false;
     notifyListeners();
   }
 
@@ -45,15 +53,39 @@ class TablesTrainsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  //FUNCION PARA MOSTRAR LOS DATOS DE TRENES OFRECIDOS
+  /*Future<void> tableTrainsOffered(BuildContext context, String user) async{
+    try{
+        final url = Uri.parse('${Enviroment.baseUrl}/getInfoTren?user=$user');
+        print(url);
+        final response = await http.get(url);
+
+        if(response.statusCode == 200){
+          final Map<String, dynamic> jsonData = json.decode(response.body);
+          if(jsonData['DataTren'] != null && jsonData['DataTren']['wrapper']){
+            final Map<String, dynamic> _wrapper = jsonData['DataTren']['wrapper'];
+            _dataTrainsOffered.add(_wrapper);
+            notifyListeners();
+          }
+        }
+
+    }catch(e){
+        print('error: $e');
+    }finally{
+      notifyListeners();
+    }
+  }*/
+
   // FUNCION PARA MOSTRAR LOS DATOS DEL TREN
   Future<void> tableDataTrain(BuildContext context, String trenYFecha,
       final ffcc, String estacion) async {
     _isLoading = true;
+    _trainData = false;
     notifyListeners();
 
     try {
       final url = Uri.parse(
-          'http://10.10.76.150/TrenSeguroDev/api/getInfoTren?idTren=$trenYFecha&ffcc=$ffcc&estacion=$estacion');
+          '${Enviroment.baseUrl}/getInfoTren?idTren=$trenYFecha&ffcc=$ffcc&estacion=$estacion');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -82,6 +114,7 @@ class TablesTrainsProvider with ChangeNotifier {
             _wrapper['vacios'] = _wrapper['vacios'] ?? 0;
 
             _dataTrain.add(_wrapper);
+            _trainData = true;
             notifyListeners();
           } else {
             _wrapper.remove('estacion_actual');
@@ -91,17 +124,20 @@ class TablesTrainsProvider with ChangeNotifier {
             print(_wrapper);
 
             _dataTrain = [_wrapper];
+            _trainData = true;
             notifyListeners();
           }
         } else {
           _showFlushbar(context,
               'El tren "$trenYFecha" no fue encontrado, favor de verificar.');
           _isLoading = false;
+          _trainData = false;
           notifyListeners();
         }
       } else {
         _showFlushbar(context, 'Error en la solicitud: ${response.statusCode}');
         _isLoading = false;
+        _trainData = false;
         notifyListeners();
       }
     } catch (e) {
@@ -117,11 +153,12 @@ class TablesTrainsProvider with ChangeNotifier {
   Future<void> refreshTableDataTrain(
       BuildContext context, String train, String estacion) async {
     _isLoading = true;
+    _trainData = true;
     notifyListeners();
 
     try {
       final url = Uri.parse(
-          'http://10.10.76.150/TrenSeguroDev/api/getDataTren?idTren=$train&estacion=$estacion');
+          '${Enviroment.baseUrl}/getDataTren?idTren=$train&estacion=$estacion');
       final response = await http.get(
         url,
         headers: {
@@ -142,9 +179,18 @@ class TablesTrainsProvider with ChangeNotifier {
 
           // Guardar el ID
           final ID = wrapperData['ID']?.toString();
-          setSelectedID(ID ?? '');
-          print('ID guardado en el provider: $ID');
-
+          if (ID != null && ID.isNotEmpty) {
+            // Verificar si ya hay un ID guardado
+            if (selectedID == null || selectedID!.isEmpty) {
+              // Solo guardar si no hay ninguno guardado
+              setSelectedID(ID);
+              print('ID guardado en el provider: $ID');
+            } else {
+              print('ID ya estaba guardado: $selectedID');
+              _trainData = false;
+            }
+          }
+         
           // Normalizar datos
           wrapperData['ID'] = wrapperData['ID'] ?? 'No disponible';
           wrapperData['destino'] = wrapperData['destino'] ?? 'No disponible';
@@ -154,18 +200,18 @@ class TablesTrainsProvider with ChangeNotifier {
 
           // Limpiar y actualizar lista
           _dataTrain = [];
-          notifyListeners();
           _dataTrain.add(wrapperData);
-
           notifyListeners();
         } else {
           _showFlushbar(
               context, 'El tren "$train" no fue encontrado, favor de revisar.');
           print('Datos no encontrados para el tren "$train"');
+          _trainData = false;
         }
       } else {
         _showFlushbar(context, 'Error en la solicitud: ${response.statusCode}');
         print('Error en la solicitud: ${response.statusCode}');
+        _trainData = false;
       }
     } catch (e) {
       _showFlushbar(context, 'Ocurrió un error: $e');
@@ -183,7 +229,7 @@ class TablesTrainsProvider with ChangeNotifier {
 
     try {
       final url = Uri.parse(
-          'http://10.10.76.150/TrenSeguroDev/api/getInfoTrenRechazadoCCO?idTren=$train');
+          '${Enviroment.baseUrl}/getInfoTrenRechazadoCCO?idTren=$train');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -241,7 +287,7 @@ class TablesTrainsProvider with ChangeNotifier {
     });
 
     final url = Uri.parse(
-        'http://10.10.76.150/TrenSeguroDev/api/getInfoTrenRechazadoCCO?idTren=$idTren');
+        '${Enviroment.baseUrl}/getInfoTrenRechazadoCCO?idTren=$idTren');
 
     try {
       final response = await http.get(url);
@@ -279,7 +325,7 @@ class TablesTrainsProvider with ChangeNotifier {
 
     try {
       final url = Uri.parse(
-          'http://10.10.76.150/TrenSeguroDev/api/getDataTren?idTren=$train&estacion=$estacion');
+          '${Enviroment.baseUrl}/getDataTren?idTren=$train&estacion=$estacion');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -334,7 +380,7 @@ class TablesTrainsProvider with ChangeNotifier {
     notifyListeners();
     try {
       final response = await http.get(Uri.parse(
-          'http://10.10.76.150/TrenSeguroDev/api/getConsist?idTren=$train&estacion=$estacion'));
+          '${Enviroment.baseUrl}/getConsist?idTren=$train&estacion=$estacion'));
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = json.decode(response.body);
         _infoTrain =

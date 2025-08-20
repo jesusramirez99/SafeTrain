@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train/config/environment.dart';
 
 class ItinerarioProvider with ChangeNotifier {
   List<Map<String, dynamic>> _itinerarios = [];
@@ -14,7 +16,7 @@ class ItinerarioProvider with ChangeNotifier {
     notifyListeners();
 
     final url = Uri.parse(
-        'http://10.10.76.150/TrenSeguroDev/api/obtenerItinerario?idTren=$idTren');
+        '${Enviroment.baseUrl}/obtenerItinerario?idTren=$idTren');
 
     try {
       final response = await http.get(url);

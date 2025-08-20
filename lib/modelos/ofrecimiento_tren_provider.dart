@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:safe_train/config/environment.dart';
 import 'package:safe_train/modelos/tablas_tren_provider.dart';
 
 class OfrecimientoTrenProvider with ChangeNotifier {
@@ -17,13 +19,14 @@ class OfrecimientoTrenProvider with ChangeNotifier {
     final tablesTrainsProvider =
         Provider.of<TablesTrainsProvider>(context, listen: false);
     final id = tablesTrainsProvider.selectedID;
+    print('id:${id}');
 
     if (id == null || id.isEmpty) {
       throw Exception('El ID del tren no está disponible');
     }
 
     final url =
-        Uri.parse('http://10.10.76.150/TrenSeguroDev/api/updateOfrecimiento');
+        Uri.parse('${Enviroment.baseUrl}/updateOfrecimiento');
     final body = jsonEncode({
       "ID": id,
       "Pending_Train_ID": tren,

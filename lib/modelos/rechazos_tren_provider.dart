@@ -4,6 +4,7 @@ import 'dart:js_interop';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train/config/environment.dart';
 import 'package:web/web.dart' as web;
 
 class RechazosProvider extends ChangeNotifier {
@@ -33,7 +34,7 @@ class RechazosProvider extends ChangeNotifier {
 
     try {
       final url =
-          'http://10.10.76.150/TrenSeguroDev/api/getRechazosUsuario?userId=$user';
+          '${Enviroment.baseUrl}/getRechazosUsuario?userId=$user';
 
       final response = await http.get(Uri.parse(url));
 

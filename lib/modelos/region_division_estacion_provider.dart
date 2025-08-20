@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train/config/environment.dart';
 
 class RegionDivisionEstacionProvider extends ChangeNotifier {
   // Provider para mostrar los roles de los usuarios
@@ -13,7 +15,7 @@ class RegionDivisionEstacionProvider extends ChangeNotifier {
   }
 
   Future<void> fetchRoles() async {
-    final url = Uri.parse("http://10.10.76.150/TrenSeguroDev/api/getRoles");
+    final url = Uri.parse("${Enviroment.baseUrl}/getRoles");
 
     try {
       final response = await http.get(url);
@@ -49,7 +51,7 @@ class RegionDivisionEstacionProvider extends ChangeNotifier {
   }
 
   Future<void> fetchRegiones() async {
-    final url = Uri.parse('http://10.10.76.150/TrenSeguroDev/api/getRegiones');
+    final url = Uri.parse('${Enviroment.baseUrl}/getRegiones');
 
     try {
       final response = await http.get(url);
@@ -85,7 +87,7 @@ class RegionDivisionEstacionProvider extends ChangeNotifier {
 
   Future<void> fetchDivisiones({required String region}) async {
     final String url =
-        "http://10.10.76.150/TrenSeguroDev/api/getDivisiones?region=$region";
+        "${Enviroment.baseUrl}/getDivisiones?region=$region";
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -122,7 +124,7 @@ class RegionDivisionEstacionProvider extends ChangeNotifier {
   Future<void> fetchEstaciones({required String division}) async {
     // Construimos la URL utilizando el parámetro de división.
     final String url =
-        "http://10.10.76.150/TrenSeguroDev/api/getEstaciones?division=$division";
+        "${Enviroment.baseUrl}/getEstaciones?division=$division";
 
     try {
       final response = await http.get(Uri.parse(url));
