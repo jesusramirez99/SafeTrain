@@ -626,9 +626,6 @@ class _DataTrainTableState extends State<DataTrainTable> {
         Colors.black,
       ),
 
-
-
-
       // Validado
       _buildValidatedCell(
           data['validado']?.toString() ?? '',
@@ -636,8 +633,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
           data['ofrecido_por']?.toString() ?? ''),
 
       // Fecha Validado
-      DataCell(
-        formattedDateCell(
+      _buildCellDateString(
+        text: data['validado_por']?.toString() ?? '',
+        widget: formattedDateCell(
           date: data['fecha_validado']?.toString() ?? '',
           format: 'dd/MM/yyyy \n HH:mm',
         ),
@@ -647,15 +645,14 @@ class _DataTrainTableState extends State<DataTrainTable> {
       //_buildCell(data['ofrecido_por']?.toString() ?? '', Colors.black),
 
       // Fecha Ofrecido
-      DataCell(
-        Center(
-          child: data['ofrecido_por'] == ''
+      _buildCellDateString(
+        text: data['ofrecido_por']?.toString() ?? '',
+        widget: data['ofrecido_por'] == ''
               ? const SizedBox() // Celda vacía si no hay nada en la celda
               : formattedDateCell(
                   date: data['fecha_ofrecido']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
-        ),
       ),
 
       // Estatus CCO - Autorizado / Rechazado
@@ -666,8 +663,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
       ),
 
       // Fecha Autorizado / Rechazado
-      DataCell(
-        formattedDateCell(
+      _buildCellDateString(
+        text: data['autorizado_por']?.toString() ?? '', 
+        widget: formattedDateCell(
           date: data['fecha_autorizado']?.toString() ?? '',
           format: 'dd/MM/yyyy \n HH:mm',
           /*textColor:
@@ -690,24 +688,23 @@ class _DataTrainTableState extends State<DataTrainTable> {
         context,
       ),
 
-      DataCell(
-        formattedDateCell(
-          date: data['fecha_autorizado']?.toString() ?? '',
+      _buildCellDateString(
+        text: data['autorizado_despacho']?.toString() ?? '', 
+        widget: formattedDateCell(
+          date: data['fecha_despacho']?.toString() ?? '',
           format: 'dd/MM/yyyy \n HH:mm',
         ),
       ),
-      
 
       // Fecha Envio de Llamado
-      DataCell(
-        Center(
-          child: data['autorizado'] == 'Rechazado'
+      _buildCellDateString(
+        text: data['llamado_por']?.toString() ?? '', 
+        widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox() // Celda vacía si está rechazado
               : formattedDateCell(
-                  date: data['fecha_autorizado']?.toString() ?? '',
+                  date: data['fecha_llamado']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
-        ),
       ),
 
       // Fecha Llamado
