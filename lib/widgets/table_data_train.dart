@@ -39,6 +39,10 @@ class _DataTrainTableState extends State<DataTrainTable> {
   void initState() {
     super.initState();
     _horizontalScrollController = ScrollController();
+    final providerDataTrain = Provider.of<TablesTrainsProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final user = userProvider.userName ?? '';
+    providerDataTrain.tableTrainsOffered(context, user);
   }
 
   @override
@@ -50,14 +54,14 @@ class _DataTrainTableState extends State<DataTrainTable> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final ScrollController _horizontalScrollController = ScrollController();
+    //final ScrollController _horizontalScrollController = ScrollController();
     final isLargeScreen = screenWidth > 1800;
     //final rowSelected = Provider.of<SelectionNotifier>(context);
     final providerDataTrain = Provider.of<TablesTrainsProvider>(context);
     /*final trainModel = Provider.of<TrainModel>(context, listen: false);
     final estacion = Provider.of<EstacionesProvider>(context, listen: false);
     final trainData = providerDataTrain.firstTrain;*/
-    print(providerDataTrain.trainData);
+    //print(providerDataTrain.trainData);
 
     return SizedBox(
       width: isLargeScreen? MediaQuery.of(context).size.width * 0.8 : MediaQuery.of(context).size.width * 0.8,
@@ -72,158 +76,124 @@ class _DataTrainTableState extends State<DataTrainTable> {
     final screenWidth = MediaQuery.of(context).size.width;
     final ScrollController _horizontalScrollController = ScrollController();
     final isLargeScreen = screenWidth > 1800;
-    final rowSelected = Provider.of<SelectionNotifier>(context);
     final providerDataTrain = Provider.of<TablesTrainsProvider>(context);
-    final trainModel = Provider.of<TrainModel>(context, listen: false);
-    final estacion = Provider.of<EstacionesProvider>(context, listen: false);
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final user = userProvider.userName ?? '';
-    //providerDataTrain.tableTrainsOffered(context, user);
-    return ListView(
-              children: [
-                const Padding (
-                  padding: EdgeInsets.all(12.0),
-                  child: Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Estatus Trenes Ofrecidos',
-                          style: TextStyle(
-                            fontSize: 22.0,
-                            color: Colors.black,
-                            decoration: TextDecoration.underline
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+    return Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.all(12.0),
+          child: Center(
+            child: Text(
+              'Estatus Trenes Ofrecidos',
+              style: TextStyle(
+                fontSize: 22.0,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ),
 
-                isLargeScreen ? 
-                DataTable(
-                    dataRowHeight: 65.0,
+        // ── Pantallas grandes: headers fijos + filas con scroll ───────────────
+        if (isLargeScreen) ...[
+          // Encabezados (tabla sin filas)
+          Expanded(
+            child: Scrollbar(
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    headingRowHeight: 56,
+                    dataRowHeight: 65,
                     decoration: _cabeceraTabla(),
-                    columns: _buildColumnsTrainStatusTrainsOffered(),
-                    rows: List<DataRow>.generate(
-                      providerDataTrain.dataTrain.length,
-                      (index) => DataRow(
-                        selected: index == _selectedRowIndex,
-                        onSelectChanged: (isSelected) {
-                          setState(() {
-                            if (isSelected != null && isSelected) {
-                              _selectedRowIndex = index;
-                              _selectedTrain = providerDataTrain.dataTrainsOffered[index]['IdTren'].toString();
-                              _selectedEstation = providerDataTrain.dataTrainsOffered[index]['estacion_actual'].toString();
-
-                              print('Fila seleccionada: $_selectedRowIndex');
-                              print('Estacion: $_selectedEstation');
-                              print('Tren: $_selectedTrain');
-
-                              trainModel.setSelectedTrain(_selectedTrain);
-                              estacion.updateSelectedEstacion(_selectedEstation);
-                              rowSelected.updateSelectedRow(index);
-                            } else {
-                              _selectedRowIndex = -1;
-                              _selectedTrain = '';
-                              rowSelected.updateSelectedRow(null);
-                              print('Fila deseleccionada: $_selectedRowIndex');
-                              print('Tren: $_selectedTrain');
-                            }
-                          });
-                        },
-                        color: WidgetStateColor.resolveWith(
-                          (Set<WidgetState> states) {
-                            if (states.contains(WidgetState.selected)) {
-                              return const Color.fromARGB(255, 226, 237, 247);
-                            } else {
-                              return index % 2 == 0 ? Colors.white : Colors.white;
-                            }
-                          },
-                        ),
-                        cells: _buildCellsTrainStatusTrainsOffered(providerDataTrain.dataTrainsOffered[index]),
-                      ),
-                    ),
                     border: TableBorder(
                       horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
                       verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
                     ),
-                  )
-
-                
-                :
-                
-                ScrollbarTheme(
-                  data: ScrollbarThemeData(
-                      thumbColor: WidgetStateProperty.all<Color>(Colors.grey), // color del pulgar
-                      trackColor: WidgetStateProperty.all<Color>(Colors.grey.shade300), // fondo del track
-                      trackBorderColor: WidgetStateProperty.all<Color>(Colors.grey.shade400), // borde del track
-                      radius: const Radius.circular(8), // borde redondeado del thumb
-                      thickness: WidgetStateProperty.all<double>(8.0), // grosor del thumb
-                    ), 
-                        child: Scrollbar(
-                          thumbVisibility: true,
-                          trackVisibility: true,
-                          controller: _horizontalScrollController,
-                          child: SingleChildScrollView(
-                            controller: _horizontalScrollController,
-                            scrollDirection: Axis.horizontal,
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 10.0),
-                              child: DataTable(
-                                columnSpacing: 10.0,
-                                dataRowHeight: 50.0,
-                                decoration: _cabeceraTabla(),
-                                columns: _buildColumnsTrainStatusTrainsOffered(),
-                                rows: List<DataRow>.generate(
-                                  providerDataTrain.dataTrain.length,
-                                  (index) => DataRow(
-                                    selected: index == _selectedRowIndex,
-                                    onSelectChanged: (isSelected) {
-                                      setState(() {
-                                        if (isSelected != null && isSelected) {
-                                          _selectedRowIndex = index;
-                                          _selectedTrain = providerDataTrain.dataTrainsOffered[index]['IdTren'].toString();
-                                          _selectedEstation = providerDataTrain.dataTrainsOffered[index]['estacion_actual'].toString();
-
-                                          print('Fila seleccionada: $_selectedRowIndex');
-                                          print('Estacion: $_selectedEstation');
-                                          print('Tren: $_selectedTrain');
-
-                                          trainModel.setSelectedTrain(_selectedTrain);
-                                          estacion.updateSelectedEstacion(_selectedEstation);
-                                          rowSelected.updateSelectedRow(index);
-                                        } else {
-                                          _selectedRowIndex = -1;
-                                          _selectedTrain = '';
-                                          rowSelected.updateSelectedRow(null);
-                                          print('Fila deseleccionada: $_selectedRowIndex');
-                                          print('Tren: $_selectedTrain');
-                                        }
-                                      });
-                                    },
-                                    color: MaterialStateColor.resolveWith(
-                                      (Set<MaterialState> states) {
-                                        if (states.contains(MaterialState.selected)) {
-                                          return const Color.fromARGB(255, 226, 237, 247);
-                                        } else {
-                                          return index % 2 == 0 ? Colors.white : Colors.white;
-                                        }
-                                      },
-                                    ),
-                                    cells: _buildCellsTrainStatusTrainsOffered(providerDataTrain.dataTrainsOffered[index]),
-                                  ),
-                                ),
-                                border: TableBorder(
-                                  horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
-                                  verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
-                                ),
-                              ),
-                            )
+                    columns: _buildColumnsTrainStatusTrainsOffered(),
+                    rows: List<DataRow>.generate(
+                      providerDataTrain.dataTrainsOffered.length,
+                      (index) => DataRow(
+                        selected: index == _selectedRowIndex,
+                        color: MaterialStateColor.resolveWith(
+                          (states) => states.contains(MaterialState.selected)
+                              ? const Color.fromARGB(255, 226, 237, 247)
+                              : (index % 2 == 0 ? Colors.white : Colors.white),
+                        ),
+                        cells: _buildCellsTrainStatusTrainsOffered(
+                          providerDataTrain.dataTrainsOffered[index],
                         ),
                       ),
+                    ),
+                  ),
                 ),
-              ],
+              ),
+            ),
+          )
+
+        ]
+        // ── Pantallas pequeñas: scroll horizontal de toda la tabla ────────────
+        else
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isSmallScreen = constraints.maxWidth < 800;
+                return ScrollbarTheme(
+                  data: ScrollbarThemeData(
+                    thumbColor: MaterialStateProperty.all(Colors.grey),
+                    trackColor: MaterialStateProperty.all(Colors.grey.shade300),
+                    trackBorderColor: MaterialStateProperty.all(Colors.grey.shade400),
+                    radius: const Radius.circular(8),
+                    thickness: MaterialStateProperty.all(8.0),
+                  ),
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    trackVisibility: true,
+                    controller: _horizontalScrollController,
+                    child: SingleChildScrollView(
+                      controller: _horizontalScrollController,
+                      scrollDirection: Axis.horizontal,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: isSmallScreen ? constraints.maxWidth : 1000, 
+                          // mínimo ancho de la tabla: ocupa todo el ancho en móvil, fijo en desktop
+                        ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: DataTable(
+                            columnSpacing: 10.0,
+                            dataRowHeight: 50.0,
+                            decoration: _cabeceraTabla(),
+                            columns: _buildColumnsTrainStatusTrainsOffered(),
+                            rows: List<DataRow>.generate(
+                              providerDataTrain.dataTrainsOffered.length,
+                              (index) => DataRow(
+                                selected: index == _selectedRowIndex,
+                                color: MaterialStateColor.resolveWith((states) {
+                                  return states.contains(MaterialState.selected)
+                                      ? const Color.fromARGB(255, 226, 237, 247)
+                                      : (index % 2 == 0 ? Colors.white : Colors.white);
+                                }),
+                                cells: _buildCellsTrainStatusTrainsOffered(
+                                  providerDataTrain.dataTrainsOffered[index],
+                                ),
+                              ),
+                            ),
+                            border: TableBorder(
+                              horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+                              verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
     );
   }
 
@@ -453,8 +423,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
     Provider.of<TablesTrainsProvider>(context);
     Provider.of<TrainModel>(context, listen: false);
 
-    // FORMATEO DE LA FECHA
-    Widget formattedDateCell({
+   // FORMATEO DE LA FECHA
+    Widget formattedDateCellTrainsOffered({
       required String date,
       String format = 'dd/MM/yyyy \n HH:mm',
       Color textColor = Colors.black,
@@ -476,6 +446,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
               fontWeight: FontWeight.bold,
               color: textColor,
             ),
+            textAlign: TextAlign.center,
           ),
         );
       } catch (e) {
@@ -506,25 +477,31 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
     
       // Fecha Vaidado
-      DataCell(
+      _buildCellDateString(
+        text: data['validado_por']?.toString() ?? '',
+        widget: formattedDateCellTrainsOffered(
+          date: data['fecha_validado']?.toString() ?? '',
+          format: 'dd/MM/yyyy \nHH:mm',
+        ),
+      ),
+
+      /*DataCell(
         formattedDateCell(
           date: data['fecha_validado']?.toString() ?? '',
           format: 'dd/MM/yyyy \n HH:mm',
         ),
-      ),
+      ),*/
 
       // Fecha Ofrecido
-      DataCell(
-        Center(
-          child: data['ofrecido_por'] == ''
+      _buildCellDateString(
+        text: data['ofrecido_por']?.toString() ?? '', 
+        widget: data['ofrecido_por'] == ''
               ? const SizedBox() // Celda vacía si no hay nada en la celda
-              : formattedDateCell(
+              : formattedDateCellTrainsOffered(
                   date: data['fecha_ofrecido']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
-        ),
       ),
-
       // Estatus CCO - Autorizado / Rechazado
       _buildStatusCell(
         data['autorizado']?.toString() ?? 'Autorizado',
@@ -533,49 +510,58 @@ class _DataTrainTableState extends State<DataTrainTable> {
       ),
 
       // Fecha Autorizado / Rechazado
-      DataCell(
-        formattedDateCell(
+      _buildCellDateString(
+        text: data['autorizado_por']?.toString() ?? '', 
+        widget: formattedDateCellTrainsOffered(
           date: data['fecha_autorizado']?.toString() ?? '',
           format: 'dd/MM/yyyy \n HH:mm',
         ),
       ),
 
-
       //Estatus Despacho y Fecha Despacho
-      _buildCell(data['autorizado']?.toString() ?? '', Colors.black),
-
-
-      _buildCell(data['fecha_autorizado']?.toString() ?? '', Colors.black),
-      
-      // Fecha Envio de Llamado
-      DataCell(
-        Center(
-          child: data['autorizado'] == 'Rechazado'
-              ? const SizedBox() // Celda vacía si está rechazado
-              : formattedDateCell(
-                  date: data['fecha_autorizado']?.toString() ?? '',
-                  format: 'dd/MM/yyyy \n HH:mm',
-                ),
-        ),
+      _buildStatusCell(
+        data['estatus_despacho']?.toString() ?? '',
+        data['estatus_despacho'] == 'Autorizado'? Colors.green : Colors.red,
+        context      
       ),
 
-      // Fecha Llamado
-      DataCell(
-        Center(
-          child: data['autorizado'] == 'Rechazado'
+
+      _buildCellDateString(
+        text: data['autorizado_despacho']?.toString() ?? '', 
+        widget: formattedDateCellTrainsOffered(
+          date: data['fecha_despacho']?.toString() ?? '',
+          format: 'dd/MM/yyyy \n HH:mm',
+        ),
+      ),
+      
+      // Fecha Envio de Llamado
+      _buildCellDateString(
+        text: data['llamado_por']?.toString() ?? '', 
+        widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox()
-              : formattedDateCell(
+              : formattedDateCellTrainsOffered(
                   date: data['fecha_llamado']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
-        ),
+      ),
+
+      // Fecha Llamado
+      _buildCellDateString(
+        text: data['llamado_por']?.toString() ?? '', 
+        widget: data['autorizado'] == 'Rechazado'
+              ? const SizedBox()
+              : formattedDateCellTrainsOffered(
+                  date: data['fecha_llamado']?.toString() ?? '',
+                  format: 'dd/MM/yyyy \n HH:mm',
+                ),
       ),
 
       // Fecha llamada completada
-      DataCell(
-        formattedDateCell(
+      _buildCellDateString(
+        text: data['llamado_por']?.toString() ?? '', 
+        widget: formattedDateCellTrainsOffered(
           date: data['fecha_llamado']?.toString() ?? '',
-          format: 'dd/MM/yyyy \n HH:mm:ss',
+          format: 'dd/MM/yyyy \n HH:mm',
         ),
       ),
     ];    
@@ -649,7 +635,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
           data['autorizado']?.toString() ?? '',
           data['ofrecido_por']?.toString() ?? ''),
 
-      // Fecha Vaidado
+      // Fecha Validado
       DataCell(
         formattedDateCell(
           date: data['fecha_validado']?.toString() ?? '',
@@ -801,6 +787,35 @@ class _DataTrainTableState extends State<DataTrainTable> {
     );
   }
 
+  DataCell _buildCellDateString({
+    required String text,
+    required Widget widget,
+    Color textColor = Colors.black,
+  }) {
+    return DataCell(
+      Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Primer texto
+            widget,
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
   DataCell _buildStatusCell(
       String text, Color textColor, BuildContext context) {
     final trenProvider = Provider.of<TrainModel>(context, listen: false);
@@ -879,6 +894,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
   // METODO PARA MOSTRAR EL MODAL PARA ENVIAR OFRECIMIENTO
   void _showConfirmationDialog(BuildContext context) {
+    final TextEditingController _observacionesController = TextEditingController();
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -969,6 +985,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
                                 ofrecidoPor: user!,
                                 fechaOfrecido: fechaOfrecido,
                                 estacion: estacion!,
+                                observaciones: _observacionesController.text,
                               );
 
                               Navigator.pop(innerContext);

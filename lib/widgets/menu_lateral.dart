@@ -440,6 +440,7 @@ class MenuLateralState extends State<MenuLateral> {
           builder: (BuildContext context, StateSetter setDialogState) {
             final screenSize = MediaQuery.of(context).size;
             final dialogWidth = screenSize.width * 0.4;
+            final TextEditingController _observacionesController = TextEditingController();
             final dialogHeight = screenSize.height * 0.4;
             offset ??= Offset(
               (screenSize.width - dialogWidth) / 2,
@@ -500,6 +501,18 @@ class MenuLateralState extends State<MenuLateral> {
                                           fontSize: 22.0,
                                           color: Colors.black,
                                         ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 30.0),
+                                    TextField(
+                                      controller: _observacionesController,
+                                      maxLength: 300,
+                                      maxLines: 7,
+                                      minLines: 3,
+                                      decoration: const InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        labelText: 'Observaciones',
+                                        alignLabelWithHint: true,
                                       ),
                                     ),
                                   ],
@@ -566,6 +579,7 @@ class MenuLateralState extends State<MenuLateral> {
                                             ofrecidoPor: user!,
                                             fechaOfrecido: fechaOfrecido,
                                             estacion: estacion!,
+                                            observaciones: _observacionesController.text,
                                           );
 
                                           Navigator.pop(context); // Cierra el loading

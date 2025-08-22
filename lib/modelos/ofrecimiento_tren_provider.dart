@@ -15,6 +15,7 @@ class OfrecimientoTrenProvider with ChangeNotifier {
     required String ofrecidoPor,
     required String fechaOfrecido,
     required String estacion,
+    required String observaciones,
   }) async {
     final tablesTrainsProvider =
         Provider.of<TablesTrainsProvider>(context, listen: false);
@@ -34,6 +35,8 @@ class OfrecimientoTrenProvider with ChangeNotifier {
       "ofrecido_por": ofrecidoPor,
       "fecha_ofrecido": fechaOfrecido,
       "estacion_actual": estacion,
+      //Linea para agregar las observaciones y mandarlas al backend
+      //"observaciones": observaciones,
     });
 
     try {

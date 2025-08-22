@@ -54,27 +54,33 @@ class TablesTrainsProvider with ChangeNotifier {
   }
 
   //FUNCION PARA MOSTRAR LOS DATOS DE TRENES OFRECIDOS
-  /*Future<void> tableTrainsOffered(BuildContext context, String user) async{
+  Future<void> tableTrainsOffered(BuildContext context, String user) async{
+    _isLoading = true;
     try{
-        final url = Uri.parse('${Enviroment.baseUrl}/getInfoTren?user=$user');
+        final url = Uri.parse('${Enviroment.baseUrl}/getListaOfrecimientos?user=$user');
         print(url);
         final response = await http.get(url);
 
         if(response.statusCode == 200){
           final Map<String, dynamic> jsonData = json.decode(response.body);
-          if(jsonData['DataTren'] != null && jsonData['DataTren']['wrapper']){
-            final Map<String, dynamic> _wrapper = jsonData['DataTren']['wrapper'];
-            _dataTrainsOffered.add(_wrapper);
-            notifyListeners();
+
+          if (jsonData['DataTren'] != null &&
+              jsonData['DataTren']['wrapper'] != null &&
+              jsonData['DataTren']['wrapper'] is List) {
+            
+            final List<dynamic> wrapper = jsonData['DataTren']['wrapper'];
+
+            _dataTrainsOffered.clear();
+            _dataTrainsOffered.addAll(wrapper.map((e) => e as Map<String, dynamic>));
           }
         }
-
     }catch(e){
         print('error: $e');
     }finally{
+      _isLoading = false;
       notifyListeners();
     }
-  }*/
+  }
 
   // FUNCION PARA MOSTRAR LOS DATOS DEL TREN
   Future<void> tableDataTrain(BuildContext context, String trenYFecha,
