@@ -51,6 +51,7 @@ class RegionProvider extends ChangeNotifier {
   }
 }
 
+
 // clase para obtener el tren
 class TrainModel with ChangeNotifier {
   String? _selectedTrain;

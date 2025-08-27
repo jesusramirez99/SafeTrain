@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -9,6 +10,50 @@ class SelectionNotifier extends ChangeNotifier {
   void updateSelectedRow(int? index) {
     selectedRowNotifier.value = index;
     notifyListeners();
+
+  }
+}
+
+class SelectedRowModel extends ChangeNotifier {
+  int? _selectedRowIndex;
+  String? _selectedStatus;
+  String? _selectedOffered;
+
+  int? get selectedRowIndex => _selectedRowIndex;
+  String? get selectedStatus => _selectedStatus;
+  String? get selectedOffered => _selectedOffered;
+
+  void setSelectedRow({
+    required int index,
+    required String status,
+    required String offered,
+  }) {
+    _selectedRowIndex = index;
+    _selectedStatus = status;
+    _selectedOffered = offered;
+    notifyListeners();
+  }
+
+  void clearSelection() {
+    _selectedRowIndex = -1;
+    _selectedStatus = '';
+    _selectedOffered = '';
+    notifyListeners();
+  }
+
+  bool get canValidate {
+    if (_selectedRowIndex == null) return false;
+    final status = _selectedStatus ?? '';
+    final hasOffered = _selectedOffered != null && _selectedOffered!.isNotEmpty;
+
+    if (hasOffered) {
+      if (status.contains("Rechazado")) return true;
+      if (status.isEmpty) return false;
+      if (status.contains("Autorizado")) return false;
+      return false;
+    } else {
+      return true;
+    }
   }
 }
 

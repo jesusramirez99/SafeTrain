@@ -37,6 +37,7 @@ void main() {
         ChangeNotifierProvider(create: (context) => ButtonStateNotifier()),
         ChangeNotifierProvider(create: (context) => TrainSelectionProvider()),
         ChangeNotifierProvider(create: (context) => TrainModel()),
+        ChangeNotifierProvider(create: (context) => SelectedRowModel()),
         ChangeNotifierProvider(create: (context) => TenderProvider()),
         ChangeNotifierProvider(create: (context) => DateProvider()),
         ChangeNotifierProvider(create: (context) => TablesTrainsProvider()),

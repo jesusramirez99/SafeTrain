@@ -33,6 +33,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
       -1; // Inicializa la variable para la fila seleccionada
   String _selectedTrain = '';
   String _selectedEstation = '';
+  String _selectedOferred = '';
+  String _selectedStatus = '';
   late final ScrollController _horizontalScrollController;
 
   @override
@@ -93,9 +95,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
           ),
         ),
 
-        // ── Pantallas grandes: headers fijos + filas con scroll ───────────────
+
         if (isLargeScreen) ...[
-          // Encabezados (tabla sin filas)
           Expanded(
             child: Scrollbar(
               thumbVisibility: true,
@@ -203,6 +204,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
     final screenWidth = MediaQuery.of(context).size.width;
     final ScrollController _horizontalScrollController = ScrollController();
     final isLargeScreen = screenWidth > 1800;
+    final buttonStateNotifier = Provider.of<ButtonStateNotifier>(context, listen: false);
     final rowSelected = Provider.of<SelectionNotifier>(context);
     final providerDataTrain = Provider.of<TablesTrainsProvider>(context);
     final trainModel = Provider.of<TrainModel>(context, listen: false);
@@ -260,23 +262,37 @@ class _DataTrainTableState extends State<DataTrainTable> {
                       (index) => DataRow(
                         selected: index == _selectedRowIndex,
                         onSelectChanged: (isSelected) {
+                          final selectedRowNotifier = Provider.of<SelectedRowModel>(context, listen: false);
+                          
+
                           setState(() {
                             if (isSelected != null && isSelected) {
                               _selectedRowIndex = index;
+                              _selectedOferred = providerDataTrain.dataTrain[index]['ofrecido_por'].toString();
+                              _selectedStatus = providerDataTrain.dataTrain[index]['autorizado'].toString();
                               _selectedTrain = providerDataTrain.dataTrain[index]['IdTren'].toString();
                               _selectedEstation = providerDataTrain.dataTrain[index]['estacion_actual'].toString();
-
-                              print('Fila seleccionada: $_selectedRowIndex');
                               print('Estacion: $_selectedEstation');
                               print('Tren: $_selectedTrain');
+                             
+                              selectedRowNotifier.setSelectedRow(
+                                index: _selectedRowIndex, 
+                                status: _selectedStatus, 
+                                offered: _selectedOferred
+                              );
 
                               trainModel.setSelectedTrain(_selectedTrain);
                               estacion.updateSelectedEstacion(_selectedEstation);
                               rowSelected.updateSelectedRow(index);
+
                             } else {
                               _selectedRowIndex = -1;
+                              _selectedStatus = '';
+                              _selectedOferred = '';
                               _selectedTrain = '';
                               rowSelected.updateSelectedRow(null);
+                              selectedRowNotifier.clearSelection();
+
                               print('Fila deseleccionada: $_selectedRowIndex');
                               print('Tren: $_selectedTrain');
                             }
@@ -329,9 +345,18 @@ class _DataTrainTableState extends State<DataTrainTable> {
                                   (index) => DataRow(
                                     selected: index == _selectedRowIndex,
                                     onSelectChanged: (isSelected) {
+                                      final rowNotifier = Provider.of<SelectedRowModel>(context, listen: false);
                                       setState(() {
                                         if (isSelected != null && isSelected) {
                                           _selectedRowIndex = index;
+                                          final rowData =  providerDataTrain.dataTrain[index];
+
+                                          rowNotifier.setSelectedRow(
+                                            index: index, 
+                                            status: providerDataTrain.dataTrain[index]['autorizado'].toString(), 
+                                            offered: providerDataTrain.dataTrain[index]['ofrecido_por'].toString()
+                                          );
+
                                           _selectedTrain = providerDataTrain.dataTrain[index]['IdTren'].toString();
                                           _selectedEstation = providerDataTrain.dataTrain[index]['estacion_actual'].toString();
 
@@ -346,6 +371,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
                                           _selectedRowIndex = -1;
                                           _selectedTrain = '';
                                           rowSelected.updateSelectedRow(null);
+                                          rowNotifier.clearSelection();
                                           print('Fila deseleccionada: $_selectedRowIndex');
                                           print('Tren: $_selectedTrain');
                                         }
@@ -387,8 +413,6 @@ class _DataTrainTableState extends State<DataTrainTable> {
       DataColumn(label: _buildHeaderCell('Fecha\nOfrecido')),
       DataColumn(label: _buildHeaderCell('Estatus\nCCO')),
       DataColumn(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado')),
-      DataColumn(label: _buildHeaderCell('Estatus\nDespacho')),
-      DataColumn(label: _buildHeaderCell('Fecha Despacho\nAutorizado/Rechazado')),
       DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
       DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
       DataColumn(label: _buildHeaderCell('Llamada\nCompletada'))
@@ -411,8 +435,6 @@ class _DataTrainTableState extends State<DataTrainTable> {
       DataColumn(label: _buildHeaderCell('Estatus\nCCO')),
       DataColumn(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado')),
       //DataColumn(label: _buildHeaderCell('Autorizado')),
-      DataColumn(label: _buildHeaderCell('Estatus\nDespacho')),
-      DataColumn(label: _buildHeaderCell('Fecha Despacho\nAutorizado/Rechazado')),
       DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
       DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
       DataColumn(label: _buildHeaderCell('Llamada\nCompletada'))
@@ -518,21 +540,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
         ),
       ),
 
-      //Estatus Despacho y Fecha Despacho
-      _buildStatusCell(
-        data['estatus_despacho']?.toString() ?? '',
-        data['estatus_despacho'] == 'Autorizado'? Colors.green : Colors.red,
-        context      
-      ),
-
-
-      _buildCellDateString(
-        text: data['autorizado_despacho']?.toString() ?? '', 
-        widget: formattedDateCellTrainsOffered(
-          date: data['fecha_despacho']?.toString() ?? '',
-          format: 'dd/MM/yyyy \n HH:mm',
-        ),
-      ),
+   
       
       // Fecha Envio de Llamado
       _buildCellDateString(
@@ -680,21 +688,6 @@ class _DataTrainTableState extends State<DataTrainTable> {
             : data['llamado_por']?.toString() ?? '',
         Colors.black, 
       ),*/
-
-      //Estatus Despacho y Fecha Despacho
-       _buildStatusCell(
-        data['autorizado']?.toString() ?? 'Autorizado',
-        data['autorizado'] == 'Autorizado' ? Colors.green : Colors.red,
-        context,
-      ),
-
-      _buildCellDateString(
-        text: data['autorizado_despacho']?.toString() ?? '', 
-        widget: formattedDateCell(
-          date: data['fecha_despacho']?.toString() ?? '',
-          format: 'dd/MM/yyyy \n HH:mm',
-        ),
-      ),
 
       // Fecha Envio de Llamado
       _buildCellDateString(

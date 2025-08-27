@@ -83,7 +83,8 @@ class MenuLateralState extends State<MenuLateral> {
       builder: (context, selectedIndex, Widget? child) {
         bool isActive = _currentView == TableView.indicators;
         return TextButton(
-          onPressed: selectedIndex == null || selectedIndex == -1
+          onPressed:
+          selectedIndex == null || selectedIndex == -1
               ? null
               : () {
                   setState(() {
@@ -188,6 +189,9 @@ class MenuLateralState extends State<MenuLateral> {
   // BOTON VALIDAR TREN
   Widget _btnValidar(BuildContext context) {
     final selectionNotifier = Provider.of<SelectionNotifier>(context);
+    final buttonStateNotifier = Provider.of<ButtonStateNotifier>(context);
+    final selectedRow = Provider.of<SelectedRowModel>(context);
+
     final trenProvider = Provider.of<TrainModel>(context, listen: false);
     final tren = trenProvider.selectedTrain;
     final selectedEstacion =
@@ -201,10 +205,11 @@ class MenuLateralState extends State<MenuLateral> {
       valueListenable: selectionNotifier.selectedRowNotifier,
       builder: (context, selectedIndex, Widget? child) {
         return TextButton(
-          onPressed: //_isButtonEnabled &&
-              selectedIndex != null && selectedIndex != -1
+        
+          onPressed: selectedRow.canValidate
                   ? () async {
                       try {
+                        print('si pudo validar');
                         _showFlushbar(
                           context,
                           'Validando el tren...',
@@ -283,9 +288,10 @@ class MenuLateralState extends State<MenuLateral> {
                         });*/
                       }
                     }
-                  : null,
+                  : 
+                  null,
           //style: _buttonStyle(selectedIndex, !_isButtonEnabled),
-          style: _buttonStyle(selectedIndex),
+          style: _buttonStyleValidate(isDisabled: selectedRow.canValidate),
           child: const Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -415,6 +421,21 @@ class MenuLateralState extends State<MenuLateral> {
       ),
     );
   }
+
+  ButtonStyle _buttonStyleValidate({required bool isDisabled}) {
+  return ButtonStyle(
+    overlayColor: MaterialStateProperty.all(
+      const Color.fromRGBO(163, 159, 159, 0.8),
+    ),
+    mouseCursor: MaterialStateProperty.all<MouseCursor>(
+      isDisabled ? SystemMouseCursors.click : SystemMouseCursors.forbidden,
+    ),
+    foregroundColor: MaterialStateProperty.all<Color>(
+      isDisabled ? Colors.grey : Colors.white,
+    ),
+  );
+}
+
 
   Future<void> _refreshTable(BuildContext context) async {
     final tren = Provider.of<TrainModel>(context, listen: false);
