@@ -36,7 +36,7 @@ class OfrecimientoTrenProvider with ChangeNotifier {
       "fecha_ofrecido": fechaOfrecido,
       "estacion_actual": estacion,
       //Linea para agregar las observaciones y mandarlas al backend
-      //"observaciones": observaciones,
+      "ofrec_observaciones": observaciones,
     });
 
     try {

@@ -529,6 +529,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
         data['autorizado']?.toString() ?? 'Autorizado',
         data['autorizado'] == 'Autorizado' ? Colors.green : Colors.red,
         context,
+        data['IdTren']?.toString(),
       ),
 
       // Fecha Autorizado / Rechazado
@@ -807,11 +808,11 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
 
   DataCell _buildStatusCell(
-      String text, Color textColor, BuildContext context) {
+      String text, Color textColor, BuildContext context, [String? IdTren]) {
     final trenProvider = Provider.of<TrainModel>(context, listen: false);
     final tablesProvider =
         Provider.of<TablesTrainsProvider>(context, listen: false);
-    final String tren = trenProvider.selectedTrain ?? '';
+    //final String tren = trenProvider.selectedTrain ?? '';
 
     return DataCell(
       MouseRegion(
@@ -820,8 +821,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
             : SystemMouseCursors.basic,
         child: GestureDetector(
           onTap: () async {
-            if (text == 'Rechazado') {
-              await tablesProvider.fetchRechazoInfo(tren);
+            if (text == 'Rechazado' && IdTren != null) {
+              await tablesProvider.fetchRechazoInfo(IdTren);
               if (context.mounted) {
                 showDialog(
                   context: context,

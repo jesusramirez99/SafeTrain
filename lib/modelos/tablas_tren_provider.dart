@@ -229,8 +229,10 @@ class TablesTrainsProvider with ChangeNotifier {
   }
 
   // FUNCION PARA MOSTRAR LOS TRENES RECHAZADOS
+  //PONER EL FALSE Y EL TRUE
   Future<void> showTrenesRechazados(BuildContext context, String train) async {
     _isLoading = true;
+    _trainData = false;
     notifyListeners(); // Notificar inicio de carga
 
     try {
@@ -264,15 +266,18 @@ class TablesTrainsProvider with ChangeNotifier {
           _dataTrain.add(wrapperData); // Agregar nuevo registro
 
           print('Datos añadidos a la tabla: $_dataTrain');
+          _trainData = true;
           notifyListeners(); // Notificar que la lista cambió
         } else {
           _showFlushbar(
               context, 'El tren "$train" no fue encontrado, favor de revisar.');
           print('Datos no encontrados para el tren "$train"');
+          _trainData = false;
         }
       } else {
         _showFlushbar(context, 'Error en la solicitud: ${response.statusCode}');
         print('Error en la solicitud: ${response.statusCode}');
+        _trainData = false;
       }
     } catch (e) {
       _showFlushbar(context, 'Ocurrió un error: $e');
