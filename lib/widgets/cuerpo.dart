@@ -49,6 +49,7 @@ class CuerpoState extends State<Cuerpo> {
   bool _showInfoTrain = false;
   bool _isLoading = false;
   String _trenYFecha = '';
+  int _selectedRowIndex = -1;
   
 
   List<Map<String, dynamic>> _dataTrain = [];
@@ -177,6 +178,12 @@ class CuerpoState extends State<Cuerpo> {
         final provider =
             Provider.of<TablesTrainsProvider>(context, listen: false);
         provider.tableDataTrain(context, _trenYFecha, ffcc, estaciones!);
+        final selectedRowNotifier = Provider.of<SelectedRowModel>(context, listen: false);
+        selectedRowNotifier.setSelectedRow(
+          index: _selectedRowIndex, 
+          status: '', 
+          offered: '',
+        ); 
       } else {
         print('La fecha debe tener al menos dos caracteres');
       }

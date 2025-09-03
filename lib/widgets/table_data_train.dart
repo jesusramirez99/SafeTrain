@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -29,13 +31,13 @@ class DataTrainTable extends StatefulWidget {
 }
 
 class _DataTrainTableState extends State<DataTrainTable> {
-  int _selectedRowIndex =
-      -1; // Inicializa la variable para la fila seleccionada
+  int _selectedRowIndex = -1; // Inicializa la variable para la fila seleccionada
   String _selectedTrain = '';
   String _selectedEstation = '';
   String _selectedOferred = '';
   String _selectedStatus = '';
   late final ScrollController _horizontalScrollController;
+  Timer? _timer; // 👈 para guardar el timer
 
   @override
   void initState() {
@@ -45,10 +47,15 @@ class _DataTrainTableState extends State<DataTrainTable> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final user = userProvider.userName ?? '';
     providerDataTrain.tableTrainsOffered(context, user);
+     _timer = Timer.periodic(const Duration(minutes: 2), (_) {
+      providerDataTrain.tableTrainsOffered(context, user);
+    });
+    
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _horizontalScrollController.dispose();
     super.dispose();
   }
@@ -260,6 +267,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
                     rows: List<DataRow>.generate(
                       providerDataTrain.dataTrain.length,
                       (index) => DataRow(
+                        
                         selected: index == _selectedRowIndex,
                         onSelectChanged: (isSelected) {
                           final selectedRowNotifier = Provider.of<SelectedRowModel>(context, listen: false);
@@ -268,6 +276,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
                           setState(() {
                             if (isSelected != null && isSelected) {
                               _selectedRowIndex = index;
+                              print("indes: ${_selectedRowIndex}");
                               _selectedOferred = providerDataTrain.dataTrain[index]['ofrecido_por'].toString();
                               _selectedStatus = providerDataTrain.dataTrain[index]['autorizado'].toString();
                               _selectedTrain = providerDataTrain.dataTrain[index]['IdTren'].toString();
@@ -515,7 +524,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
       ),*/
 
       // Fecha Ofrecido
-      _buildCellDateString(
+      _buildCellDateStringObservationsOffered(
         text: data['ofrecido_por']?.toString() ?? '', 
         widget: data['ofrecido_por'] == ''
               ? const SizedBox() // Celda vacía si no hay nada en la celda
@@ -523,6 +532,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
                   date: data['fecha_ofrecido']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
+        context: context,
+        id: data['IdTren'].toString(),
       ),
       // Estatus CCO - Autorizado / Rechazado
       _buildStatusCell(
@@ -654,7 +665,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
       //_buildCell(data['ofrecido_por']?.toString() ?? '', Colors.black),
 
       // Fecha Ofrecido
-      _buildCellDateString(
+      _buildCellDateStringObservations(
         text: data['ofrecido_por']?.toString() ?? '',
         widget: data['ofrecido_por'] == ''
               ? const SizedBox() // Celda vacía si no hay nada en la celda
@@ -662,6 +673,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
                   date: data['fecha_ofrecido']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
+        context: context,
+        id: data['IdTren'],
       ),
 
       // Estatus CCO - Autorizado / Rechazado
@@ -669,6 +682,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
         data['autorizado']?.toString() ?? 'Autorizado',
         data['autorizado'] == 'Autorizado' ? Colors.green : Colors.red,
         context,
+        data['IdTren']?.toString(),
       ),
 
       // Fecha Autorizado / Rechazado
@@ -805,6 +819,112 @@ class _DataTrainTableState extends State<DataTrainTable> {
       ),
     );
   }
+  DataCell _buildCellDateStringObservationsOffered({
+    required String text,
+    required Widget widget,
+    Color textColor = Colors.black,
+    required String id,
+    required BuildContext context,
+
+  }) {
+    return DataCell(
+      Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Primer texto
+            widget,
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+      onTap: () async{
+        final provider = Provider.of<TablesTrainsProvider>(context, listen: false);
+        final observaciones = await provider.fetchObservationsOfrecidos(id);
+
+        if(context.mounted){
+          showDialog(
+            context: context, 
+            builder: (BuildContext ctx){
+              return AlertDialog(
+                title: const Text('Observaciones'),
+                content: Text(observaciones),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text('Cerrar'),
+                  ),
+                ],
+              );
+            }
+          );
+        }
+      }
+    );
+  }
+
+  DataCell _buildCellDateStringObservations({
+    required String text,
+    required Widget widget,
+    Color textColor = Colors.black,
+    required String id,
+    required BuildContext context,
+
+  }) {
+    return DataCell(
+      Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Primer texto
+            widget,
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+      onTap: () async{
+        final provider = Provider.of<TablesTrainsProvider>(context, listen: false);
+        final observaciones = await provider.fetchObservationsDataTrain(id);
+
+        if(context.mounted){
+          showDialog(
+            context: context, 
+            builder: (BuildContext ctx){
+              return AlertDialog(
+                title: const Text('Observaciones'),
+                content: Text(observaciones),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text('Cerrar'),
+                  ),
+                ],
+              );
+            }
+          );
+        }
+      }
+    );
+  }
+
 
 
   DataCell _buildStatusCell(

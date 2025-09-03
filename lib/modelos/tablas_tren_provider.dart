@@ -328,6 +328,68 @@ class TablesTrainsProvider with ChangeNotifier {
     }
   }
 
+  Future<String> fetchObservationsDataTrain(String idTren) async {
+    _isLoading = true;
+
+    Future.delayed(Duration.zero, () {
+      notifyListeners();
+    });
+
+    final url = Uri.parse(
+        '${Enviroment.baseUrl}/getInfoTrenRechazadoCCO?idTren=$idTren');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final wrapper = data['DataTren']['wrapper'];
+        final observOfrecimiento = (wrapper['observ_ofrecimiento']?.toString().isEmpty ?? true) ? 'Sin observaciones' :  wrapper['observ_ofrecimiento'].toString();
+        return observOfrecimiento;
+      } else {
+        return "Error al obtener datos";
+      }
+    } catch (e) {
+      return "Error de conexión";
+    } finally {
+      Future.delayed(Duration.zero, () {
+        _isLoading = false;
+        notifyListeners();
+      });
+    }
+  }
+
+  Future<String> fetchObservationsOfrecidos(String idTren) async {
+    _isLoading = true;
+
+    Future.delayed(Duration.zero, () {
+      notifyListeners();
+    });
+
+    final url = Uri.parse(
+        '${Enviroment.baseUrl}/getTrenOfrecido?idTren=$idTren');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final wrapper = data['DataTren']['wrapper'];
+        final observOfrecimiento = (wrapper['observ_ofrecimiento']?.toString().isEmpty ?? true) ? 'Sin observaciones' :  wrapper['observ_ofrecimiento'].toString();
+        return observOfrecimiento;
+      } else {
+        return "Error al obtener datos";
+      }
+    } catch (e) {
+      return "Error de conexión";
+    } finally {
+      Future.delayed(Duration.zero, () {
+        _isLoading = false;
+        notifyListeners();
+      });
+    }
+  }
+
   // FUNCION PARA MOSTRAR TRENES RECHAZADOS
   Future<void> mostrarTrenes(
       BuildContext context, String train, String estacion) async {

@@ -42,7 +42,7 @@ class SelectedRowModel extends ChangeNotifier {
   }
 
   bool get canValidate {
-    if (_selectedRowIndex == null) return false;
+    if (_selectedRowIndex == -1) return false;
     final status = _selectedStatus ?? '';
     final hasOffered = _selectedOffered != null && _selectedOffered!.isNotEmpty;
 
