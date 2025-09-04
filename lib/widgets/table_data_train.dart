@@ -424,7 +424,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
       DataColumn(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado')),
       DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
       DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
-      DataColumn(label: _buildHeaderCell('Llamada\nCompletada'))
+      DataColumn(label: _buildHeaderCell('Registro de\nSalida'))
     ];
   }
 
@@ -446,7 +446,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
       //DataColumn(label: _buildHeaderCell('Autorizado')),
       DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
       DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
-      DataColumn(label: _buildHeaderCell('Llamada\nCompletada'))
+      DataColumn(label: _buildHeaderCell('Registro de \nSalida'))
     ];
   }
 
@@ -578,9 +578,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha llamada completada
       _buildCellDateString(
-        text: data['llamado_por']?.toString() ?? '', 
+        text: '', 
         widget: formattedDateCellTrainsOffered(
-          date: data['fecha_llamado']?.toString() ?? '',
+          date: '',
           format: 'dd/MM/yyyy \n HH:mm',
         ),
       ),
@@ -727,7 +727,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
         ),
       ),
 
-      // Fecha llamada completada
+      //Registro de salida
       DataCell(
         formattedDateCell(
           date: '',

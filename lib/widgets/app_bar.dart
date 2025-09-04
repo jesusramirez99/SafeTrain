@@ -23,6 +23,8 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _CustomAppBarState extends State<CustomAppBar> {
+  int _selectedRowIndex = -1;
+
   @override
   void initState() {
     super.initState();
@@ -202,6 +204,12 @@ class _CustomAppBarState extends State<CustomAppBar> {
             // Actualizar tabla con el tren seleccionado
             Provider.of<TablesTrainsProvider>(context, listen: false)
                 .showTrenesRechazados(context, trainId);
+            final selectedRowNotifier = Provider.of<SelectedRowModel>(context, listen: false);
+            selectedRowNotifier.setSelectedRow(
+              index: _selectedRowIndex, 
+              status: '', 
+              offered: '',
+            );
 
             widget.idTrainFocusNode.requestFocus();
           },
