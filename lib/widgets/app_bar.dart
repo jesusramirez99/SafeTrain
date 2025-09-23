@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train/modelos/change_notifier_provider.dart';
 import 'package:safe_train/modelos/rechazos_tren_provider.dart';
 import 'package:safe_train/modelos/tablas_tren_provider.dart';
@@ -42,11 +43,12 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     return AppBar(
       backgroundColor: const Color.fromARGB(255, 64, 63, 61),
         iconTheme: IconThemeData(
           color: Colors.grey.shade200,
-          size: 33.0,
+          size: isLaptop? 28.0 : 33.0,
         ),
       title: Center(
         child: Row(
@@ -55,8 +57,8 @@ class _CustomAppBarState extends State<CustomAppBar> {
             const SizedBox(width: 16.0),
             Image.asset(
               'assets/images/gmxt-logo.png',
-              width: 145.0,
-              height: 60.0,
+              width: isLaptop? 120.0 : 145.0,
+              height: isLaptop? 50.0 : 60.0,
             ),
             const SizedBox(width: 65.0),
             Expanded(
@@ -71,78 +73,78 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 return Row(
                   children: [
                     _iconNotification(context),
-                    const SizedBox(width: 12.0),
+                    SizedBox(width: isLaptop? 8.0 : 12.0),
                     _lineaDivisora(),
-                    const SizedBox(width: 8.0),
+                    SizedBox(width: isLaptop? 6.0 : 8.0),
                     Tooltip(
                       message: 'Usuario',
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.account_circle_rounded,
-                            size: 17.0,
+                            size: isLaptop? 15.0 : 17.0,
                             color: Color.fromARGB(255, 61, 233, 70),
                           ),
                           const SizedBox(width: 6.0),
                           Text(
                             userProvider.userName ?? '',
-                            style: const TextStyle(
-                              fontSize: 12.0,
+                            style: TextStyle(
+                              fontSize: isLaptop? 11.0 : 12.0,
                               color: Colors.white,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8.0),
+                    SizedBox(width: isLaptop? 6.0 : 8.0),
                     _lineaDivisora(),
-                    const SizedBox(
-                      width: 8.0,
+                    SizedBox(
+                      width: isLaptop? 6.0 : 8.0,
                     ),
                     Tooltip(
                       message: 'Región',
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.terrain_rounded,
-                            size: 18.0,
-                            color: Color.fromARGB(255, 61, 233, 70),
+                            size: isLaptop? 16.0 : 18.0,
+                            color: const Color.fromARGB(255, 61, 233, 70),
                           ),
                           const SizedBox(width: 6.0),
                           Text(
                             regionProvider.region ?? '',
-                            style: const TextStyle(
-                                fontSize: 12.0, color: Colors.white),
+                            style: TextStyle(
+                                fontSize: isLaptop? 11.0 : 12.0, color: Colors.white),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8.0),
+                    SizedBox(width: isLaptop? 6.0 : 8.0),
                     _lineaDivisora(),
-                    const SizedBox(width: 8.0),
+                    SizedBox(width: isLaptop? 6.0 : 8.0),
                     Tooltip(
                       message: 'Ferrocarril',
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.directions_train,
-                            size: 17.0,
-                            color: Color.fromARGB(255, 61, 233, 70),
+                            size: isLaptop? 15.0 : 17.0,
+                            color: const Color.fromARGB(255, 61, 233, 70),
                           ),
                           const SizedBox(width: 6.0),
                           Text(
                             ffccProvider.selectedItem,
-                            style: const TextStyle(
-                              fontSize: 12.0,
+                            style: TextStyle(
+                              fontSize: isLaptop? 11.0 : 12.0,
                               color: Colors.white,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12.0),
+                    SizedBox(width: isLaptop? 10.0 : 12.0),
                     _lineaDivisora(),
-                    const SizedBox(width: 14.0),
+                    SizedBox(width: isLaptop? 10.0 : 14.0),
                     _btnSalir(context),
                   ],
                 );
@@ -152,12 +154,14 @@ class _CustomAppBarState extends State<CustomAppBar> {
         ),
       ),
       leading: Builder(
+        
         builder: (BuildContext context) {
+        final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
         final roleProvider = context.watch<RoleProvider>();
         final isAdmin = roleProvider.role == 'Admin';
         print('Rol: ${roleProvider.role}');
           return IconButton(
-            icon: const Icon(Icons.menu),
+            icon: Icon(Icons.menu, size: isLaptop? 25.0 : 30.0 ),
             tooltip: 'Catálogos',
             onPressed: isAdmin
                 ? () {
@@ -172,6 +176,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
   // Icono de Notificaciones de trenes rechazados
   Widget _iconNotification(BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     final ofrecimientoProvider = Provider.of<RechazosProvider>(context);
     final trenesOfrecidos = ofrecimientoProvider.trenesOfrecidos;
     final isLoading = ofrecimientoProvider.isLoading;
@@ -189,7 +194,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
       clipBehavior: Clip.none,
       children: [
         PopupMenuButton<String>(
-          icon: const Icon(Icons.notifications_active, size: 17.0),
+          icon: Icon(Icons.notifications_active, size: isLaptop? 15.0 : 17.0),
           tooltip: 'Trenes Rechazados',
           onOpened: () => ofrecimientoProvider.fetchRechazos(context, user),
           onSelected: (trainId) {
@@ -276,6 +281,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
   // Opcion Salir del barApp
   TextButton _btnSalir(BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     return TextButton(
       onPressed: () {
         //disconnectSession(context);
@@ -312,20 +318,20 @@ class _CustomAppBarState extends State<CustomAppBar> {
           SystemMouseCursors.click,
         ),
       ),
-      child: const Center(
+      child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.logout,
               color: Color.fromARGB(255, 255, 99, 97),
-              size: 15.0,
+              size: isLaptop? 13.0 : 15.0,
             ),
             SizedBox(width: 10),
             Text(
               'Salir',
               style: TextStyle(
-                fontSize: 14.0,
+                fontSize: isLaptop? 13.0 : 14.0,
                 color: Color.fromARGB(255, 255, 99, 97),
               ),
             ),
@@ -345,10 +351,11 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
   // Estilo titulo BARAPP
   TextStyle estiloTextBarApp() {
-    return const TextStyle(
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
+    return TextStyle(
       fontWeight: FontWeight.w400,
-      fontSize: 25.0,
-      color: Color.fromARGB(255, 233, 227, 227),
+      fontSize: isLaptop? 16.0 : 25.0,
+      color: const Color.fromARGB(255, 233, 227, 227),
     );
   }
 }

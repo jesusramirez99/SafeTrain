@@ -1,6 +1,7 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train/modelos/change_notifier_provider.dart';
 import 'package:safe_train/modelos/estaciones_provider.dart';
 import 'package:safe_train/modelos/excel_download_provider.dart';
@@ -206,12 +207,13 @@ class CuerpoState extends State<Cuerpo> {
   }
 
   Widget showFlushbarSupport(String mensaje, Color color) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     return Container(
       color: color,
       padding: const EdgeInsets.all(10),
       child: Text(
         mensaje,
-        style: const TextStyle(fontSize: 15.0, color: Colors.black),
+        style: TextStyle(fontSize: isLaptop? 12.0 : 15.0, color: Colors.black),
       ),
     );
   }
@@ -220,11 +222,9 @@ class CuerpoState extends State<Cuerpo> {
   Widget build(BuildContext context) {
     
     final estacionProvider = Provider.of<EstacionesProvider>(context);
-    final screenWidth = MediaQuery.of(context).size.width;
-
     // Breakpoints simples
-    final isLargeScreen = screenWidth > 1800;
     //final isMediumScreen = screenWidth > 1200 && screenWidth <= 1800;
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
 
     return Scaffold(
       body: Column(
@@ -235,24 +235,32 @@ class CuerpoState extends State<Cuerpo> {
                 width: 30.0,
                 height: 55.0,
               ),*/
-
-              showFlushbarSupport('En caso de alguna observación en la validación favor de enviar el archivo\nde la formación con sus comentarios a omar.ameca@ferromex.mx y\nluis.aguirre@ferromex.mx', const Color.fromARGB(255, 243, 234, 149)),
-              
+              /*showFlushbarSupport(
+                'En caso de alguna observación en la validación favor de enviar el archivo\n'
+                'de la formación con sus comentarios a omar.ameca@ferromex.mx y\n'
+                'luis.aguirre@ferromex.mx',
+                const Color.fromARGB(255, 243, 234, 149),
+              ),*/
               /*Expanded(
                 child: Center(
                   child: textoListaTrenes('Validación de Trenes'),
                 ),
               ),*/
-
-              const SizedBox(width: 565.0),
-
-              Container(
+              const Spacer(),
+              /*Expanded(
                 child: Center(
-                  child: textoListaTrenes('Validación de Trenes'),
+                  child: textoListaTrenes('Validación de Trenes', isLaptop),
+                ),
+              ),*/
+              //SizedBox(width: isLaptop? 45.0 : 565.0),
+              SizedBox(
+                height: isLaptop? 55.0 : 90.0,
+                child: Center(
+                  child: textoListaTrenes('Validación de Trenes', isLaptop),
                 ),
               ),
-
-
+              
+              const Spacer(),
               /*Expanded(
                 child: Center(
                   child: textoListaTrenes('Validacion de Trenes'),
@@ -266,7 +274,7 @@ class CuerpoState extends State<Cuerpo> {
           Center(
             child: Container(
               color: Colors.grey.shade600,
-              height: 105.0,
+              height: isLaptop? 70.0 : 105.0,
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -274,38 +282,37 @@ class CuerpoState extends State<Cuerpo> {
                     Expanded(
                       child: Row(
                         children: <Widget>[
-                          SizedBox(width: isLargeScreen ? 110.0 : 40.0),
+                          SizedBox(width: isLaptop ? 50.0 : 155.0),
                           textos('Tren'),
-                          SizedBox(width: isLargeScreen ? 25.0 : 15.0),
+                          SizedBox(width: isLaptop ? 15.0 : 25.0),
                           TextFieldIdTrain(
                             focusNode: _focusNode,
                             idTrainController: _idTrainController,
                             isEnabled: !_enabledIdTrain,
                           ),
-                          SizedBox(width: isLargeScreen? 40.0 : 20.0),
+                          SizedBox(width: isLaptop? 20.0 : 40.0),
                           textos('Fecha'),
-                          const SizedBox(width: 1.0),
+                          SizedBox(width: isLaptop? 0.5 : 1.0),
                           Fecha(
                             fechaController: _fechaController,
                             isEnabled: !_enabledFecha,
                           ),
-                          SizedBox(width: isLargeScreen? 40.0 : 10.0),    
+                          SizedBox(width: isLaptop? 15.0 : 40.0),    
                           _dropdownEstacion(context),
-                          SizedBox(width: isLargeScreen? 40.0 : 20.0),
+                          SizedBox(width: isLaptop? 20.0 : 40.0),
                           iconSearch(context),
-                          SizedBox(width: isLargeScreen? 25.0 : 20.0),
+                          SizedBox(width: isLaptop? 20.0 : 25.0),
                           const BotonCancelar(),
-                          SizedBox(width: isLargeScreen? 50.0 : 80.0),
-                          isLargeScreen
-                          ? Expanded(
+                          //SizedBox(width: isLaptop? 50.0 : 80.0),
+                          Expanded(
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   //_iconCompareConsist(context),
-                                  const SizedBox(width: 20.0),
+                                  SizedBox(width: isLaptop? 10.0 : 5.0),
                                   iconPrint(context),
-                                  const SizedBox(width: 45.0),
+                                  SizedBox(width: isLaptop? 25.0 : 30.0),
                                   dateTime(context, "fecha"),
                                   const SizedBox(width: 10.0),
                                   const Text(
@@ -316,25 +323,8 @@ class CuerpoState extends State<Cuerpo> {
                                   dateTime(context, "hora  hrs."),
                                 ],
                               ),
-                            )
-                          : Row(                             
-                                children: [
-                                //_iconCompareConsist(context),
-                                const SizedBox(width: 15.0),
-                                iconPrint(context),
-                                SizedBox(width: isLargeScreen ? 20.0 : 15.0),
-                                dateTime(context, "fecha"),
-                                const SizedBox(width: 10.0),
-                                const Text(
-                                  '-',
-                                  style: TextStyle(color: Colors.white, fontSize: 17.0),
-                                ),
-                                const SizedBox(width: 10.0),
-                                dateTime(context, "hora  hrs."),
-                                ],
-                          ),
-                             
-                          SizedBox(width: isLargeScreen ? 80.0 : 10.0),
+                            ),
+                          SizedBox(width: isLaptop ? 80.0 : 180.0),
                         ],
                       ),
                     ),
@@ -387,11 +377,12 @@ class CuerpoState extends State<Cuerpo> {
   }
 
   // ESTILO TITULO VALIDACION DE TRENES
-  Text textoListaTrenes(String texto) {
+  Text textoListaTrenes(String texto, bool size) {
     return Text(
+    
       texto,
       style: TextStyle(
-        fontSize: 20.0,
+        fontSize: size? 18.0 : 20.0,
         fontWeight: FontWeight.w700,
         color: Colors.grey.shade700,
       ),
@@ -413,6 +404,7 @@ class CuerpoState extends State<Cuerpo> {
   // ICONO BUSQUEDA DE TREN
   Widget iconSearch(BuildContext context) {
     final provider = Provider.of<HistorialValidacionesProvider>(context);
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     final validationHistory = provider.validationHistory;
     if(validationHistory.isNotEmpty){
       validationHistory.clear();
@@ -433,7 +425,7 @@ class CuerpoState extends State<Cuerpo> {
           : null,
       child: Icon(
         Icons.search,
-        size: 35.0,
+        size: isLaptop? 25.0 : 35.0,
         color: _isHovered ? Colors.grey.shade300 : Colors.white,
       ),
     );
@@ -458,7 +450,7 @@ class CuerpoState extends State<Cuerpo> {
   Widget iconPrint(BuildContext context) {
     final trenProvider = Provider.of<TrainModel>(context, listen: false);
     final tren = trenProvider.selectedTrain;
-
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     final estacionProvider =
         Provider.of<EstacionesProvider>(context, listen: false);
     final estacion = estacionProvider.selectedEstacion;
@@ -487,9 +479,9 @@ class CuerpoState extends State<Cuerpo> {
                 excelProvider.descargarExcel(tren, estacion);
               }
             : null,
-        child: const Icon(
+        child: Icon(
           Icons.print,
-          size: 23.0,
+          size: isLaptop? 20.0 : 23.0,
           color: Colors.white,
         ),
       ),
@@ -498,6 +490,7 @@ class CuerpoState extends State<Cuerpo> {
 
   // Dropdown Estacion
   Widget _dropdownEstacion(BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     return Consumer<EstacionesProvider>(
       builder: (context, estacionesProvider, _) {
         final estaciones = estacionesProvider.estaciones;
@@ -507,8 +500,8 @@ class CuerpoState extends State<Cuerpo> {
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          width: 220.0,
-          height: 45.0,
+          width: isLaptop? 170.0 : 220.0,
+          height: isLaptop? 40.0 : 45.0,
           child: estaciones.isEmpty
               ? const Center(child: CircularProgressIndicator())
               : Autocomplete<String>(
@@ -542,6 +535,9 @@ class CuerpoState extends State<Cuerpo> {
                           controller: controller,
                           focusNode: focusNode,
                           enabled: _enabledEstacion,
+                          style: TextStyle(
+                            fontSize: isLaptop? 14.0 : 16.0,
+                          ),
                           onChanged: (text) {
                             // Si el texto supera el límite actual, recortarlo
                             if (text.length > maxLength) {
@@ -560,7 +556,7 @@ class CuerpoState extends State<Cuerpo> {
                           },
                           decoration: _estiloDrop().copyWith(
                             hintText: 'ESTACION',
-                            hintStyle: const TextStyle(color: Colors.grey),
+                            hintStyle: TextStyle(color: Colors.grey, fontSize: isLaptop? 14.0 : 16.0),
                             suffixIcon: const Icon(
                               Icons.house_rounded,
                               color: Colors.grey,
@@ -621,8 +617,7 @@ class CuerpoState extends State<Cuerpo> {
 
   // WIDGET PARA LA FECHA Y HORA
   Widget dateTime(BuildContext context, String texto) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isLargeScreen = screenWidth > 1800;
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     final dateProvider = Provider.of<DateProvider>(context);
 
     String displayText = '';
@@ -635,7 +630,7 @@ class CuerpoState extends State<Cuerpo> {
 
     return Text(
       displayText,
-      style: TextStyle(fontSize: isLargeScreen ? 17.0 : 15.0, color: Colors.white),
+      style: TextStyle(fontSize: isLaptop ? 14.0 : 17.0, color: Colors.white),
     );
   }
 

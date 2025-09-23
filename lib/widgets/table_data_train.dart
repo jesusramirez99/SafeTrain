@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train/modales/mostrar_rechazo_obs_trenes.dart';
 import 'package:safe_train/modelos/change_notifier_provider.dart';
 import 'package:safe_train/modelos/estaciones_provider.dart';
@@ -16,6 +18,7 @@ class DataTrainTable extends StatefulWidget {
   final bool isLoading;
   final String selectedTrain;
   final VoidCallback toggleTableData;
+  
 
   const DataTrainTable({
     super.key,
@@ -34,6 +37,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
   int _selectedRowIndex = -1; // Inicializa la variable para la fila seleccionada
   String _selectedTrain = '';
   String _selectedEstation = '';
+  String _filterStation = "";
   String _selectedOferred = '';
   String _selectedStatus = '';
   late final ScrollController _horizontalScrollController;
@@ -82,19 +86,28 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
   //Tabla de trenes ofrecidos
   Widget _buildTableStatusTrainsOffered(){
-    final screenWidth = MediaQuery.of(context).size.width;
     final ScrollController _horizontalScrollController = ScrollController();
-    final isLargeScreen = screenWidth > 1800;
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     final providerDataTrain = Provider.of<TablesTrainsProvider>(context);
+    final filteredTrains = _filterStation.isEmpty
+      ? providerDataTrain.dataTrainsOffered
+      : providerDataTrain.dataTrainsOffered
+          .where((train) => train['estacion_actual']
+              .toString()
+              .toLowerCase()
+              .contains(_filterStation.toLowerCase()))
+          .toList();
+
+
     return Column(
       children: [
-        const Padding(
-          padding: EdgeInsets.all(12.0),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
           child: Center(
             child: Text(
               'Estatus Trenes Ofrecidos',
               style: TextStyle(
-                fontSize: 22.0,
+                fontSize: isLaptop? 18.0 : 22.0,
                 color: Colors.black,
                 decoration: TextDecoration.underline,
               ),
@@ -102,105 +115,71 @@ class _DataTrainTableState extends State<DataTrainTable> {
           ),
         ),
 
-
-        if (isLargeScreen) ...[
-          Expanded(
-            child: Scrollbar(
-              thumbVisibility: true,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    headingRowHeight: 56,
-                    dataRowHeight: 65,
-                    decoration: _cabeceraTabla(),
-                    border: TableBorder(
-                      horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
-                      verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
-                    ),
-                    columns: _buildColumnsTrainStatusTrainsOffered(),
-                    rows: List<DataRow>.generate(
-                      providerDataTrain.dataTrainsOffered.length,
-                      (index) => DataRow(
-                        selected: index == _selectedRowIndex,
-                        color: MaterialStateColor.resolveWith(
-                          (states) => states.contains(MaterialState.selected)
-                              ? const Color.fromARGB(255, 226, 237, 247)
-                              : (index % 2 == 0 ? Colors.white : Colors.white),
-                        ),
-                        cells: _buildCellsTrainStatusTrainsOffered(
-                          providerDataTrain.dataTrainsOffered[index],
-                        ),
-                      ),
-                    ),
-                  ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 8),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: SizedBox(
+              width: isLaptop? 190.0 : 230.0,
+              // mismo ancho que la primera columna de la tabla
+              child: TextField(
+                style: TextStyle(
+                  fontSize: isLaptop? 14.0 : 16.0,
                 ),
+                decoration: InputDecoration(
+                  labelText: "Buscar estación",
+                  labelStyle: TextStyle(fontSize: isLaptop? 14.0 : 16.0),
+                  prefixIcon: const Icon(Icons.search),
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: isLaptop? 5 : 8, vertical: isLaptop? 5 : 8),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _filterStation = value;
+                  });
+                },
               ),
             ),
-          )
-
-        ]
-        // ── Pantallas pequeñas: scroll horizontal de toda la tabla ────────────
-        else
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isSmallScreen = constraints.maxWidth < 800;
-                return ScrollbarTheme(
-                  data: ScrollbarThemeData(
-                    thumbColor: MaterialStateProperty.all(Colors.grey),
-                    trackColor: MaterialStateProperty.all(Colors.grey.shade300),
-                    trackBorderColor: MaterialStateProperty.all(Colors.grey.shade400),
-                    radius: const Radius.circular(8),
-                    thickness: MaterialStateProperty.all(8.0),
-                  ),
-                  child: Scrollbar(
-                    thumbVisibility: true,
-                    trackVisibility: true,
-                    controller: _horizontalScrollController,
-                    child: SingleChildScrollView(
-                      controller: _horizontalScrollController,
-                      scrollDirection: Axis.horizontal,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minWidth: isSmallScreen ? constraints.maxWidth : 1000, 
-                          // mínimo ancho de la tabla: ocupa todo el ancho en móvil, fijo en desktop
-                        ),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: DataTable(
-                            columnSpacing: 10.0,
-                            dataRowHeight: 50.0,
-                            decoration: _cabeceraTabla(),
-                            columns: _buildColumnsTrainStatusTrainsOffered(),
-                            rows: List<DataRow>.generate(
-                              providerDataTrain.dataTrainsOffered.length,
-                              (index) => DataRow(
-                                selected: index == _selectedRowIndex,
-                                color: MaterialStateColor.resolveWith((states) {
-                                  return states.contains(MaterialState.selected)
-                                      ? const Color.fromARGB(255, 226, 237, 247)
-                                      : (index % 2 == 0 ? Colors.white : Colors.white);
-                                }),
-                                cells: _buildCellsTrainStatusTrainsOffered(
-                                  providerDataTrain.dataTrainsOffered[index],
-                                ),
-                              ),
-                            ),
-                            border: TableBorder(
-                              horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
-                              verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
           ),
+        ),
+
+        LayoutBuilder(
+          builder: (context, constraints) {
+            const double rowHeight = 70;
+            double screenHeight = MediaQuery.of(context).size.height;
+            double reserveSpace = 360;
+            double maxHeight = isLaptop ? screenHeight - reserveSpace : 800 ;
+            const double headingHeight = 48;
+            //double maxHeight =  isLaptop? 238 : 800;
+            final tableHeight = (filteredTrains.length * rowHeight + headingHeight).clamp(0, maxHeight);
+            
+            return SizedBox(
+              height: tableHeight.toDouble(),
+              child: DataTable2(
+                headingRowHeight: headingHeight,
+                dataRowHeight: rowHeight,
+                horizontalMargin: 8,
+                columnSpacing: 12,
+                minWidth: 1530,
+                border: TableBorder(
+                  horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+                  verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+                ),
+                decoration: _cabeceraTabla(),
+                columns: _buildColumnsTrainStatusTrainsOffered(),
+                rows: filteredTrains.map((train) => DataRow(
+                  color: MaterialStateColor.resolveWith((states) =>
+                      states.contains(MaterialState.selected)
+                          ? const Color.fromARGB(255, 226, 237, 247)
+                          : (filteredTrains.indexOf(train) % 2 == 0 ? Colors.white : Colors.grey.shade100)
+                  ),
+                  cells: _buildCellsTrainStatusTrainsOffered(train),
+                )).toList(),
+              ),
+            );
+          },
+        ),
       ],
     );
   }
@@ -208,10 +187,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
   //Tabla de datos de tren
   Widget _buildTableDataTrain(){   
-    final screenWidth = MediaQuery.of(context).size.width;
     final ScrollController _horizontalScrollController = ScrollController();
-    final isLargeScreen = screenWidth > 1800;
-    final buttonStateNotifier = Provider.of<ButtonStateNotifier>(context, listen: false);
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     final rowSelected = Provider.of<SelectionNotifier>(context);
     final providerDataTrain = Provider.of<TablesTrainsProvider>(context);
     final trainModel = Provider.of<TrainModel>(context, listen: false);
@@ -229,7 +206,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
                         Text(
                           'Datos del Tren: ${trainData?['IdTren'] ?? ''}',
                           style: TextStyle(
-                            fontSize: 22.0,
+                            fontSize: isLaptop? 18.0 : 22.0,
                             fontWeight: FontWeight.bold,
                             color: Colors.grey.shade500,
                           ),
@@ -238,7 +215,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
                         Text(
                           'Estación Origen: ${trainData?['origen'] ?? ''}',
                           style: TextStyle(
-                            fontSize: 22.0,
+                            fontSize: isLaptop? 18.0 : 22.0,
                             fontWeight: FontWeight.bold,
                             color: Colors.grey.shade500,
                           ),
@@ -247,7 +224,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
                         Text(
                           'Estación Destino: ${trainData?['destino'] ?? ''}',
                           style: TextStyle(
-                            fontSize: 22.0,
+                            fontSize: isLaptop? 18.0 : 22.0,
                             fontWeight: FontWeight.bold,
                             color: Colors.grey.shade500,
                           ),
@@ -257,10 +234,70 @@ class _DataTrainTableState extends State<DataTrainTable> {
                   ),
                 ),
 
-                isLargeScreen
+                isLaptop
                 ?
                 //TABLA DE DATOS DE TREN
-                DataTable(
+                Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: 1000,
+                      ),
+                      child: ScrollbarTheme(
+                        data: ScrollbarThemeData(
+                          thumbColor: WidgetStateProperty.all<Color>(Colors.grey),
+                          trackColor: WidgetStateProperty.all<Color>(Colors.grey.shade300),
+                          trackBorderColor: WidgetStateProperty.all<Color>(Colors.grey.shade400),
+                          radius: const Radius.circular(8),
+                          thickness: WidgetStateProperty.all<double>(8.0),
+                        ),
+                        child: Scrollbar(
+                          thumbVisibility: true,
+                          trackVisibility: true,
+                          controller: _horizontalScrollController,
+                          child: SingleChildScrollView(
+                            controller: _horizontalScrollController,
+                            scrollDirection: Axis.horizontal,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 10.0),
+                              child: DataTable(
+                                columnSpacing: 10.0,
+                                dataRowHeight: 75.0,
+                                decoration: _cabeceraTabla(),
+                                columns: _buildColumns(),
+                                rows: List<DataRow>.generate(
+                                  providerDataTrain.dataTrain.length,
+                                  (index) => DataRow(
+                                    selected: index == _selectedRowIndex,
+                                    onSelectChanged: (isSelected) {
+                                      // tu lógica de selección aquí
+                                    },
+                                    color: MaterialStateColor.resolveWith(
+                                      (Set<MaterialState> states) {
+                                        if (states.contains(MaterialState.selected)) {
+                                          return const Color.fromARGB(255, 226, 237, 247);
+                                        } else {
+                                          return index % 2 == 0 ? Colors.white : Colors.white;
+                                        }
+                                      },
+                                    ),
+                                    cells: _buildCells(providerDataTrain.dataTrain[index]),
+                                  ),
+                                ),
+                                border: TableBorder(
+                                  horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+                                  verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                )
+                
+                :
+
+                  DataTable(
                     dataRowHeight: 65.0,
                     decoration: _cabeceraTabla(),
                     columns: _buildColumns(),
@@ -325,88 +362,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
                     ),
                   )
 
-                   :
-
-                  ScrollbarTheme(
-                    data: ScrollbarThemeData(
-                      thumbColor: WidgetStateProperty.all<Color>(Colors.grey), // color del pulgar
-                      trackColor: WidgetStateProperty.all<Color>(Colors.grey.shade300), // fondo del track
-                      trackBorderColor: WidgetStateProperty.all<Color>(Colors.grey.shade400), // borde del track
-                      radius: const Radius.circular(8), // borde redondeado del thumb
-                      thickness: WidgetStateProperty.all<double>(8.0), // grosor del thumb
-                    ), 
-                        child: Scrollbar(
-                          thumbVisibility: true,
-                          trackVisibility: true,
-                          controller: _horizontalScrollController,
-                          child: SingleChildScrollView(
-                            controller: _horizontalScrollController,
-                            scrollDirection: Axis.horizontal,
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 10.0),
-                              child: DataTable(
-                                columnSpacing: 10.0,
-                                dataRowHeight: 50.0,
-                                decoration: _cabeceraTabla(),
-                                columns: _buildColumns(),
-                                rows: List<DataRow>.generate(
-                                  providerDataTrain.dataTrain.length,
-                                  (index) => DataRow(
-                                    selected: index == _selectedRowIndex,
-                                    onSelectChanged: (isSelected) {
-                                      final rowNotifier = Provider.of<SelectedRowModel>(context, listen: false);
-                                      setState(() {
-                                        if (isSelected != null && isSelected) {
-                                          _selectedRowIndex = index;
-                                          final rowData =  providerDataTrain.dataTrain[index];
-
-                                          rowNotifier.setSelectedRow(
-                                            index: index, 
-                                            status: providerDataTrain.dataTrain[index]['autorizado'].toString(), 
-                                            offered: providerDataTrain.dataTrain[index]['ofrecido_por'].toString()
-                                          );
-
-                                          _selectedTrain = providerDataTrain.dataTrain[index]['IdTren'].toString();
-                                          _selectedEstation = providerDataTrain.dataTrain[index]['estacion_actual'].toString();
-
-                                          print('Fila seleccionada: $_selectedRowIndex');
-                                          print('Estacion: $_selectedEstation');
-                                          print('Tren: $_selectedTrain');
-
-                                          trainModel.setSelectedTrain(_selectedTrain);
-                                          estacion.updateSelectedEstacion(_selectedEstation);
-                                          rowSelected.updateSelectedRow(index);
-                                        } else {
-                                          _selectedRowIndex = -1;
-                                          _selectedTrain = '';
-                                          rowSelected.updateSelectedRow(null);
-                                          rowNotifier.clearSelection();
-                                          print('Fila deseleccionada: $_selectedRowIndex');
-                                          print('Tren: $_selectedTrain');
-                                        }
-                                      });
-                                    },
-                                    color: MaterialStateColor.resolveWith(
-                                      (Set<MaterialState> states) {
-                                        if (states.contains(MaterialState.selected)) {
-                                          return const Color.fromARGB(255, 226, 237, 247);
-                                        } else {
-                                          return index % 2 == 0 ? Colors.white : Colors.white;
-                                        }
-                                      },
-                                    ),
-                                    cells: _buildCells(providerDataTrain.dataTrain[index]),
-                                  ),
-                                ),
-                                border: TableBorder(
-                                  horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
-                                  verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
-                                ),
-                              ),
-                            )
-                        ),
-                      ),
-                  ),
+                  
               ],
             );
   }
@@ -414,17 +370,17 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
   List<DataColumn> _buildColumnsTrainStatusTrainsOffered(){
     return [
-      DataColumn(label: _buildHeaderCell('Tren')),
-      DataColumn(label: _buildHeaderCell('Estación\nActual')),
-      DataColumn(label: _buildHeaderCell('Carros')),
-      DataColumn(label: _buildHeaderCell('Validado')),
-      DataColumn(label: _buildHeaderCell('Fecha\nValidado')),
-      DataColumn(label: _buildHeaderCell('Fecha\nOfrecido')),
-      DataColumn(label: _buildHeaderCell('Estatus\nCCO')),
-      DataColumn(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado')),
-      DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
-      DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
-      DataColumn(label: _buildHeaderCell('Registro de\nSalida'))
+      DataColumn2(label: _buildHeaderCell('Tren'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Estacion\nActual'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Carros'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Validado'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Fecha\nValidado'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Fecha\nOfrecido'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Estatus\nCCO'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado'), size: ColumnSize.M),
+      DataColumn2(label: _buildHeaderCell('Fecha Envío\n de Llamado'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Fecha\nLlamado'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Registro de \nSalida'), size: ColumnSize.S)
     ];
   }
 
@@ -525,6 +481,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha Ofrecido
       _buildCellDateStringObservationsOffered(
+        messageObservations: data['observ_ofrecimiento'] ?? '' ,
         text: data['ofrecido_por']?.toString() ?? '', 
         widget: data['ofrecido_por'] == ''
               ? const SizedBox() // Celda vacía si no hay nada en la celda
@@ -666,6 +623,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha Ofrecido
       _buildCellDateStringObservations(
+        messageObservations: data['observ_ofrecimiento'] ?? '',
         text: data['ofrecido_por']?.toString() ?? '',
         widget: data['ofrecido_por'] == ''
               ? const SizedBox() // Celda vacía si no hay nada en la celda
@@ -820,9 +778,10 @@ class _DataTrainTableState extends State<DataTrainTable> {
     );
   }
   DataCell _buildCellDateStringObservationsOffered({
+    required String messageObservations,
     required String text,
     required Widget widget,
-    Color textColor = Colors.black,
+    Color textColor = Colors.blueAccent,
     required String id,
     required BuildContext context,
 
@@ -833,49 +792,54 @@ class _DataTrainTableState extends State<DataTrainTable> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Primer texto
             widget,
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 15.0,
-                fontWeight: FontWeight.bold,
-                color: textColor,
+            MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("Observaciones"),
+                      content: Text(
+                        messageObservations.isEmpty
+                            ? 'Sin Observaciones'
+                            : messageObservations,
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Cerrar"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.blueAccent,
+                    decorationThickness: 2,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
       ),
-      onTap: () async{
-        final provider = Provider.of<TablesTrainsProvider>(context, listen: false);
-        final observaciones = await provider.fetchObservationsOfrecidos(id);
-
-        if(context.mounted){
-          showDialog(
-            context: context, 
-            builder: (BuildContext ctx){
-              return AlertDialog(
-                title: const Text('Observaciones'),
-                content: Text(observaciones),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('Cerrar'),
-                  ),
-                ],
-              );
-            }
-          );
-        }
-      }
     );
   }
 
   DataCell _buildCellDateStringObservations({
+    required String messageObservations,
     required String text,
     required Widget widget,
-    Color textColor = Colors.black,
+    Color textColor = Colors.blueAccent,
     required String id,
     required BuildContext context,
 
@@ -886,42 +850,46 @@ class _DataTrainTableState extends State<DataTrainTable> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Primer texto
             widget,
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 15.0,
-                fontWeight: FontWeight.bold,
-                color: textColor,
+            MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("Observaciones"),
+                      content: Text(
+                        messageObservations.isEmpty
+                            ? 'Sin Observaciones'
+                            : messageObservations,
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Cerrar"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.blueAccent,
+                    decorationThickness: 2,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
       ),
-      onTap: () async{
-        final provider = Provider.of<TablesTrainsProvider>(context, listen: false);
-        final observaciones = await provider.fetchObservationsDataTrain(id);
-
-        if(context.mounted){
-          showDialog(
-            context: context, 
-            builder: (BuildContext ctx){
-              return AlertDialog(
-                title: const Text('Observaciones'),
-                content: Text(observaciones),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('Cerrar'),
-                  ),
-                ],
-              );
-            }
-          );
-        }
-      }
     );
   }
 

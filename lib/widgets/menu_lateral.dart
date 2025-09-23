@@ -2,6 +2,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train/modales/carros_reglas_incumplidas.dart';
 import 'package:safe_train/modales/modal_itinerario.dart';
 import 'package:safe_train/modelos/change_notifier_provider.dart';
@@ -40,34 +41,39 @@ class MenuLateral extends StatefulWidget {
 enum TableView { none, indicators, information }
 
 class MenuLateralState extends State<MenuLateral> {
+  
   //bool _isButtonEnabled = true;
   TableView? _currentView;
   Offset? offset;
 
   @override
   Widget build(BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
+    final menuWidth = isLaptop ? 150.0 : 190.0;
+    final fontSize = isLaptop ? 10.5 : 13.0;
+    final iconTextSpacing = isLaptop ? 6.0 : 10.0;
     return Container(
-      width: 190.0,
+      width: menuWidth,
       color: Colors.black,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           const Divider(),
-          _btnIndicadores(),
+          _btnIndicadores(fontSize, iconTextSpacing),
           const Divider(),
-          _btnInfo(),
+          _btnInfo(fontSize, iconTextSpacing),
           const Divider(),
           const SizedBox(height: 4.0),
-          _btnValidar(context),
+          _btnValidar(context, fontSize, iconTextSpacing),
           const Divider(),
           const SizedBox(
             height: 4.0,
           ),
-          _btnHistorialValidaciones(context),
+          _btnHistorialValidaciones(context, fontSize, iconTextSpacing),
           const Divider(),
           const SizedBox(height: 4.0),
-          _btnItinerario(context),
+          _btnItinerario(context, fontSize, iconTextSpacing),
           const Divider(),
         ],
       ),
@@ -75,9 +81,9 @@ class MenuLateralState extends State<MenuLateral> {
   }
 
   // BOTON INDCADORES DEL TREN
-  Widget _btnIndicadores() {
+  Widget _btnIndicadores(double fontSize, double iconText) {
     final selectionNotifier = Provider.of<SelectionNotifier>(context);
-
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     return ValueListenableBuilder<int?>(
       valueListenable: selectionNotifier.selectedRowNotifier,
       builder: (context, selectedIndex, Widget? child) {
@@ -101,11 +107,11 @@ class MenuLateralState extends State<MenuLateral> {
                   isActive ? Icons.article_outlined : Icons.analytics_outlined,
                   color: Colors.white,
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: iconText),
                 Text(
                   isActive ? 'Datos del Tren' : 'Indicadores',
-                  style: const TextStyle(
-                    fontSize: 13.0,
+                  style: TextStyle(
+                    fontSize: fontSize,
                     color: Colors.white,
                   ),
                 ),
@@ -117,7 +123,7 @@ class MenuLateralState extends State<MenuLateral> {
     );
   }
 
-  Widget _btnInfo() {
+  Widget _btnInfo(double fontSize, double iconText) {
     final selectionNotifier = Provider.of<SelectionNotifier>(context);
 
     return ValueListenableBuilder<int?>(
@@ -144,11 +150,11 @@ class MenuLateralState extends State<MenuLateral> {
                       : Icons.perm_device_information,
                   color: Colors.white,
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: iconText),
                 Text(
                   isActive ? 'Datos del Tren' : 'Información del Tren',
-                  style: const TextStyle(
-                    fontSize: 13.0,
+                  style: TextStyle(
+                    fontSize: fontSize,
                     color: Colors.white,
                   ),
                 ),
@@ -187,7 +193,7 @@ class MenuLateralState extends State<MenuLateral> {
   }
 
   // BOTON VALIDAR TREN
-  Widget _btnValidar(BuildContext context) {
+  Widget _btnValidar(BuildContext context, double fontSize, double iconText) {
     final selectionNotifier = Provider.of<SelectionNotifier>(context);
     final buttonStateNotifier = Provider.of<ButtonStateNotifier>(context);
     final selectedRow = Provider.of<SelectedRowModel>(context);
@@ -292,19 +298,19 @@ class MenuLateralState extends State<MenuLateral> {
                   null,
           //style: _buttonStyle(selectedIndex, !_isButtonEnabled),
           style: _buttonStyleValidate(isDisabled: selectedRow.canValidate),
-          child: const Center(
+          child: Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Icon(
+                const Icon(
                   Icons.train,
                   color: Colors.white,
                 ),
-                SizedBox(width: 10),
+                SizedBox(width: iconText),
                 Text(
                   'Validar Tren',
                   style: TextStyle(
-                    fontSize: 13.0,
+                    fontSize: fontSize,
                     color: Colors.white,
                   ),
                 ),
@@ -317,7 +323,7 @@ class MenuLateralState extends State<MenuLateral> {
   }
 
   // BOTON PARA HISTORIAL DE VALIDACIONES DEL TREN
-  Widget _btnHistorialValidaciones(BuildContext context) {
+  Widget _btnHistorialValidaciones(BuildContext context, double fontSize, double iconText) {
     return TextButton(
       onPressed: () async {
         final trainProvider = Provider.of<TrainModel>(context, listen: false);
@@ -349,15 +355,15 @@ class MenuLateralState extends State<MenuLateral> {
         ),
         foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
       ),
-      child: const Center(
+      child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(Icons.add_task_outlined, color: Colors.white),
-            SizedBox(width: 10),
+            const Icon(Icons.add_task_outlined, color: Colors.white),
+            SizedBox(width: iconText),
             Text(
               'Historial',
-              style: TextStyle(fontSize: 13.0, color: Colors.white),
+              style: TextStyle(fontSize: fontSize, color: Colors.white),
             ),
           ],
         ),
@@ -366,10 +372,10 @@ class MenuLateralState extends State<MenuLateral> {
   }
 
   // BOTON PARA MOSTRAR EL ITINERARIO DEL TREN
-  Widget _btnItinerario(BuildContext context) {
+  Widget _btnItinerario(BuildContext context, double fontSize, double iconText) {
     final selectionNotifier = Provider.of<SelectionNotifier>(context);
     return ValueListenableBuilder<int?>(
-      valueListenable: selectionNotifier.selectedRowNotifier,
+      valueListenable: selectionNotifier.selectedRowNotifier, 
       builder: (context, selectedIndex, Widget? child) {
         return TextButton(
           onPressed: (selectedIndex != null && selectedIndex != -1)
@@ -384,18 +390,18 @@ class MenuLateralState extends State<MenuLateral> {
                 }
               : null, // Deshabilita el botón si no hay selección
           style: _buttonStyle(selectedIndex),
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Icon(
+              const Icon(
                 Icons.alt_route_rounded,
                 color: Colors.white,
               ),
-              SizedBox(width: 10),
+              SizedBox(width: iconText),
               Text(
                 'Itinerario del Tren',
                 style: TextStyle(
-                  fontSize: 13.0,
+                  fontSize: fontSize,
                   color: Colors.white,
                 ),
               ),
