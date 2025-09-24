@@ -205,6 +205,7 @@ class MenuLateralState extends State<MenuLateral> {
     final estacion = selectedEstacion.selectedEstacion;
     final validacionProvider = Provider.of<ValidacionReglasProvider>(context, listen: false);
     final userName = Provider.of<UserProvider>(context, listen: false);
+    final providerDataTrain = Provider.of<TablesTrainsProvider>(context, listen: false);
     final user = userName.userName;
 
     return ValueListenableBuilder<int?>(
@@ -245,6 +246,7 @@ class MenuLateralState extends State<MenuLateral> {
 
                           // Luego, refresca la tabla fuera de setState
                           await _refreshTable(context);
+                          providerDataTrain.tableTrainsOffered(context, user);
 
                           // Muestra el modal de confirmación
                           _showConfirmationDialog(
