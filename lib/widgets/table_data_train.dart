@@ -269,6 +269,40 @@ class _DataTrainTableState extends State<DataTrainTable> {
                                   (index) => DataRow(
                                     selected: index == _selectedRowIndex,
                                     onSelectChanged: (isSelected) {
+                                      final selectedRowNotifier = Provider.of<SelectedRowModel>(context, listen: false);
+                                      setState(() {
+                                        if (isSelected != null && isSelected) {
+                                          _selectedRowIndex = index;
+                                          print("indes: ${_selectedRowIndex}");
+                                          _selectedOferred = providerDataTrain.dataTrain[index]['ofrecido_por'].toString();
+                                          _selectedStatus = providerDataTrain.dataTrain[index]['autorizado'].toString();
+                                          _selectedTrain = providerDataTrain.dataTrain[index]['IdTren'].toString();
+                                          _selectedEstation = providerDataTrain.dataTrain[index]['estacion_actual'].toString();
+                                          print('Estacion: $_selectedEstation');
+                                          print('Tren: $_selectedTrain');
+                                        
+                                          selectedRowNotifier.setSelectedRow(
+                                            index: _selectedRowIndex, 
+                                            status: _selectedStatus, 
+                                            offered: _selectedOferred
+                                          );
+
+                                          trainModel.setSelectedTrain(_selectedTrain);
+                                          estacion.updateSelectedEstacion(_selectedEstation);
+                                          rowSelected.updateSelectedRow(index);
+
+                                        } else {
+                                          _selectedRowIndex = -1;
+                                          _selectedStatus = '';
+                                          _selectedOferred = '';
+                                          _selectedTrain = '';
+                                          rowSelected.updateSelectedRow(null);
+                                          selectedRowNotifier.clearSelection();
+
+                                          print('Fila deseleccionada: $_selectedRowIndex');
+                                          print('Tren: $_selectedTrain');
+                                        }
+                                      });
                                       // tu lógica de selección aquí
                                     },
                                     color: MaterialStateColor.resolveWith(
