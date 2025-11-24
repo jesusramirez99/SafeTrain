@@ -6,8 +6,9 @@ import 'package:safe_train/config/environment.dart';
 
 class RegionDivisionEstacionProvider extends ChangeNotifier {
   // Provider para mostrar los roles de los usuarios
-  List<String> _roles = [];
-  List<String> get roles => _roles;
+  List<Map<String, dynamic>> _roles = [];
+
+  List<Map<String, dynamic>> get roles => _roles;
 
   void clearRoles() {
     _roles = [];
@@ -25,8 +26,11 @@ class RegionDivisionEstacionProvider extends ChangeNotifier {
 
         if (data['Roles'] != null) {
           _roles = (data['Roles'] as List)
-              .map((role) => role['Rol'] as String)
-              .toList();
+          .map((item) => {
+                'id': item['ID'],
+               'rol': item['Rol'],
+              })
+          .toList();
           notifyListeners();
         } else {
           debugPrint("La clave 'Rol' no se encontró en la respuesta.");

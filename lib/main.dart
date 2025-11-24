@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:safe_train/modelos/AddUser_provider.dart';
 import 'package:safe_train/modelos/cars_open_provider.dart';
 import 'package:safe_train/modelos/cars_tender_provider.dart';
 import 'package:safe_train/modelos/change_notifier_provider.dart';
@@ -33,6 +34,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (context) => LoginProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
+        ChangeNotifierProvider(create: (create) => AdduserProvider()),
         ChangeNotifierProvider(create: (context) => RoleProvider()),
         ChangeNotifierProvider(create: (context) => SelectionNotifier()),
         ChangeNotifierProvider(create: (context) => ButtonStateNotifier()),

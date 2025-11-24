@@ -1,6 +1,7 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:safe_train/modelos/AddUser_provider.dart';
 import 'package:safe_train/modelos/region_division_estacion_provider.dart';
 import 'package:safe_train/widgets/custom_dropdown_button.dart';
 
@@ -17,6 +18,9 @@ class UsuariosState extends State<Usuarios> {
   final ValueNotifier<List<String>> _addedEstacionesNotifier =
       ValueNotifier<List<String>>([]);
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final bool _isloading = false;
+  int selectedRoleId = 0;
+  String regionSelected = '';
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -138,7 +142,7 @@ class UsuariosState extends State<Usuarios> {
                                                 (context, provider, child) {
                                               final rolList = [
                                                 'Seleccione un Rol',
-                                                ...provider.roles,
+                                                ...provider.roles.map((r) => r['rol'] as String),
                                               ];
                                               return _buildDropdownField(
                                                 'Rol:',
@@ -148,6 +152,8 @@ class UsuariosState extends State<Usuarios> {
                                                   setState(() {
                                                     // Reinicia el rol
                                                     _selectedRol = newValue!;
+
+                                                  
                                                     // Reinicia la región, división y estación a sus valores por defecto
                                                     _selectedRegion =
                                                         'Seleccione una Región';
@@ -175,7 +181,11 @@ class UsuariosState extends State<Usuarios> {
                                                             context,
                                                             listen: false)
                                                         .clearEstaciones();
+                                                      
+                                                    final selectedRole = provider.roles
+                                                        .firstWhere((r) => r['rol'] == _selectedRol);
 
+                                                    selectedRoleId = selectedRole['id'];
                                                     // Llamar fetchDivisiones o fetchRegiones según lo requieras
                                                     await Provider.of<
                                                                 RegionDivisionEstacionProvider>(
@@ -207,8 +217,7 @@ class UsuariosState extends State<Usuarios> {
                                                   _selectedRegion,
                                                   (newValue) async {
                                                     setState(() {
-                                                      _selectedRegion =
-                                                          newValue!;
+                                                      regionSelected = _selectedRegion = newValue!;
                                                       _selectedDivision =
                                                           'Seleccione una División';
                                                       _selectedEstacion =
@@ -588,12 +597,6 @@ class UsuariosState extends State<Usuarios> {
     );
   }
 
-  Future<void> _submit() async {
-    if (formKey.currentState!.validate()) {
-      print('submit');
-    }
-  }
-
   // CAMPO STCC
   Widget campoUsername() {
     return Container(
@@ -691,7 +694,9 @@ class UsuariosState extends State<Usuarios> {
   // BOTON REGISTRAR
   Widget _btnRegistrar(BuildContext context) {
     return ElevatedButton(
-      onPressed: () async {
+      onPressed: _isloading
+      ? null 
+      : () async {
         if (formKey.currentState!.validate()) {
           // Verificar que haya al menos una estación en el ValueNotifier
           if (_addedEstacionesNotifier.value.isEmpty) {
@@ -705,7 +710,25 @@ class UsuariosState extends State<Usuarios> {
             return;
           }
 
-          await _submit();
+          final username = _userNameController.text.trim();
+          final name = _nameController.text.trim();
+          final email = emailController.text.trim();
+          final roleId = selectedRoleId;
+          final estaciones = _addedEstacionesNotifier.value.map((station) {
+            return {
+              "Region": regionSelected,
+              "Estacion": station,
+            };
+          }).toList();
+
+          await Provider.of<AdduserProvider>(context, listen: false)
+          .addUser(
+            username, 
+            name, 
+            email, 
+            roleId, 
+            estaciones
+          );
 
           await showFlushbar(
             context,
