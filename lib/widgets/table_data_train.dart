@@ -948,9 +948,32 @@ class _DataTrainTableState extends State<DataTrainTable> {
               if (context.mounted) {
                 showDialog(
                   context: context,
-                  builder: (context) => const MostrarRechazoObsTrenes(),
+                  barrierDismissible: true,
+                  builder: (context) {
+                    Offset offset = const Offset(0, 0);
+                    return StatefulBuilder(
+                      builder: (context, setState) {
+                        return Center(
+                          child: GestureDetector(
+                            onPanUpdate: (details) {
+                              setState(() {
+                                offset += details.delta;
+                              });
+                            },
+                            child: Transform.translate(
+                              offset: offset,
+                              child: const Material(
+                                color: Colors.transparent,
+                                child: MostrarRechazoObsTrenes(),
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                    );
+                  }
                 );
-              }
+              } 
             }
           },
           child: Center(
