@@ -34,6 +34,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (context) => LoginProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
+        ChangeNotifierProvider(create: (context) => UsersProvider()),
         ChangeNotifierProvider(create: (create) => AdduserProvider()),
         ChangeNotifierProvider(create: (context) => RoleProvider()),
         ChangeNotifierProvider(create: (context) => SelectionNotifier()),

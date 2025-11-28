@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:safe_train/config/environment.dart';
 
 // PROVIDER PARA OBTENER EL USER
 class UserProvider extends ChangeNotifier {
@@ -106,3 +110,53 @@ class MotRechazoObs with ChangeNotifier {
     notifyListeners();
   }
 }
+
+//Provider para obtener los usuarios
+class UsersProvider with ChangeNotifier {
+  List<Map<String, dynamic>> _usuarios = [];
+  bool _isLoading = false;
+
+  List<Map<String, dynamic>> get usuarios => _usuarios;
+  bool get isLoading => _isLoading;
+
+  Future<void> mostrarUsers() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response =
+          await http.get(Uri.parse('${Enviroment.baseUrl}/getUsuarios'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data['ProcesoConsist'] != null &&
+            data['ProcesoConsist']['wrapper'] is List) {
+          
+          _usuarios = List<Map<String, dynamic>>.from(
+            data['ProcesoConsist']['wrapper'].map((item) {
+              final user = Map<String, dynamic>.from(item);
+              user.updateAll((key, value) {
+                if (value is String) {
+                  return value.replaceAll(RegExp(r'[\n\r]'), '');
+                }
+                return value;
+              });
+              return user;
+            }),
+          );
+        } else {
+          print("⚠ wrapper no existe o no es lista");
+        }
+      } else {
+        throw Exception('Failed to load data');
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+}
+

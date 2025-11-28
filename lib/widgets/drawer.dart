@@ -9,6 +9,7 @@ import 'package:safe_train/modales/tabla_carros_abiertos.dart';
 import 'package:safe_train/modales/tabla_carros_tender.dart';
 import 'package:safe_train/modales/tabla_distritos.dart';
 import 'package:safe_train/modales/tabla_stcc.dart';
+import 'package:safe_train/modales/tabla_usuarios.dart';
 
 class CustomDrawer extends StatefulWidget {
   CustomDrawer({Key? key}) : super(key: key);
@@ -209,7 +210,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
             'Lista de Usuarios',
             style: _styleTextOpciones(),
           ),
-          onTap: () {},
+          onTap: () {
+            MdlVerDataUsers mdlUsers = MdlVerDataUsers();
+            mdlUsers.mdlTablaUsers(context);
+          },
         ),
         ListTile(
           leading: Icon(
