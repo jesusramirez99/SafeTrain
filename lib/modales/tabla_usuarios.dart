@@ -11,6 +11,22 @@ class MdlVerUsers extends StatefulWidget {
 
 class MdlVerDataUsers extends State<MdlVerUsers> {
   final int _rowsPerPage = 5;
+  late UsersDataTable usersDataTable;
+  final TextEditingController busquedaController =  TextEditingController();
+  final GlobalKey<PaginatedDataTableState> _tablaKey = GlobalKey<PaginatedDataTableState>();
+
+
+  @override
+  void initState() {
+    super.initState();
+   
+  }
+
+  @override
+  void dispose() {
+    busquedaController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +36,7 @@ class MdlVerDataUsers extends State<MdlVerUsers> {
   Future<void> mdlTablaUsers(BuildContext context) async { 
     final usersProvider = Provider.of<UsersProvider>(context, listen: false);
     await usersProvider.mostrarUsers();
+    usersDataTable = UsersDataTable(usersProvider.filtradoUsuarios);
     return showDialog(
       context: context, 
       barrierDismissible: false,
@@ -31,12 +48,10 @@ class MdlVerDataUsers extends State<MdlVerUsers> {
               builder: (BuildContext context, StateSetter setState) {
                 return Consumer<UsersProvider>(
                   builder: (context, provider, child) {
-                    final usuarios = provider.usuarios;
-                    print('Usuarios: $usuarios');
                     if(provider.isLoading){
                       return const CircularProgressIndicator();
                     }
-
+                    usersDataTable.actualizarFiltradoUser(provider.filtradoUsuarios);
                     return Container(
                       width: 1300.0,
                       height: 550.0,
@@ -54,6 +69,7 @@ class MdlVerDataUsers extends State<MdlVerUsers> {
                             height: 580.0,
                             child: ListView(
                               children: [
+                                searchUser(context),
                                 Padding(
                                   padding: const EdgeInsets.all(10.0),
                                   child: Row(
@@ -66,6 +82,7 @@ class MdlVerDataUsers extends State<MdlVerUsers> {
                                 ),
 
                                 PaginatedDataTable(
+                                  key: _tablaKey,
                                   header: Center(
                                     child: Text(
                                       'Usuarios',
@@ -78,9 +95,9 @@ class MdlVerDataUsers extends State<MdlVerUsers> {
                                   ),
                                   headingRowColor: WidgetStatePropertyAll(Colors.black),
                                   rowsPerPage: _rowsPerPage,
-                                  onRowsPerPageChanged: null,
-                                  columns: _buildColumns(), 
-                                  source: UsersDataTable(usuarios),
+                                  onPageChanged: null,
+                                  columns: _buildColumns(),   
+                                  source: usersDataTable,
                                   dataRowHeight: 50.0,
                                 )
                               ],
@@ -125,13 +142,34 @@ class MdlVerDataUsers extends State<MdlVerUsers> {
 
   // ESTILO DEL TEXTO DEL ENCABEZADO DE LAS COLUMNAS
   TextStyle _estiloTexto() {
-    return const TextStyle(
-      fontSize: 13.0,
-      fontWeight: FontWeight.bold,
-      color: Colors.white,
-    );
+      return const TextStyle(
+        fontSize: 13.0,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      );
   }
-}
+
+  Widget searchUser(BuildContext context) {
+  return TextFormField(
+        controller: busquedaController,
+        decoration: const InputDecoration(
+          hintText: 'Ingrese el usuario o nombre',
+          border: OutlineInputBorder(),
+        ),
+        onChanged: (text) {
+          final provider = Provider.of<UsersProvider>(context, listen: false);
+          provider.filtrarUser(text);
+          usersDataTable.actualizarFiltradoUser(provider.filtradoUsuarios);
+
+          // Manejo de paginación
+          if (_tablaKey.currentState != null && text.isNotEmpty) {
+              print('pagina actual');
+              _tablaKey.currentState!.pageTo(0);
+          }
+        },
+      );
+    }
+
 
 // BOTON SALIR
   ElevatedButton btnSalir(BuildContext dialogContext) {
@@ -163,9 +201,12 @@ class MdlVerDataUsers extends State<MdlVerUsers> {
     );
   }
 
+}
+
 class UsersDataTable extends DataTableSource {
-  final List<Map<String, dynamic>> usuarios;
+  List<Map<String, dynamic>> usuarios;
   UsersDataTable(this.usuarios);
+  //late List<Map<String, dynamic>> userFiltrado;
 
 
   @override
@@ -213,6 +254,10 @@ class UsersDataTable extends DataTableSource {
  
   @override
   int get selectedRowCount => 0;
-    
+
+  void actualizarFiltradoUser(List<Map<String, dynamic>> nuevosDatosFiltrados){
+    usuarios = nuevosDatosFiltrados;
+    notifyListeners();
+  }    
 }
 

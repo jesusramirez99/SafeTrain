@@ -7,9 +7,7 @@ import 'package:safe_train/config/environment.dart';
 // PROVIDER PARA OBTENER EL USER
 class UserProvider extends ChangeNotifier {
   String? _userName;
-
   String? get userName => _userName;
-
   void setUserName(String name) {
     _userName = name;
     notifyListeners();
@@ -114,9 +112,11 @@ class MotRechazoObs with ChangeNotifier {
 //Provider para obtener los usuarios
 class UsersProvider with ChangeNotifier {
   List<Map<String, dynamic>> _usuarios = [];
+  List<Map<String, dynamic>> _filtradoUsuarios = [];
   bool _isLoading = false;
 
   List<Map<String, dynamic>> get usuarios => _usuarios;
+  List<Map<String, dynamic>> get filtradoUsuarios => _filtradoUsuarios;
   bool get isLoading => _isLoading;
 
   Future<void> mostrarUsers() async {
@@ -145,6 +145,9 @@ class UsersProvider with ChangeNotifier {
               return user;
             }),
           );
+
+          _filtradoUsuarios = List.from(_usuarios);
+        
         } else {
           print("⚠ wrapper no existe o no es lista");
         }
@@ -157,6 +160,20 @@ class UsersProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void filtrarUser(String query) {
+    if(query.isEmpty){
+      _filtradoUsuarios = List.from(_usuarios);
+    }else{
+      _filtradoUsuarios = _usuarios.where((userItem) {
+        final user = userItem['username'].toString().toLowerCase();
+        final name = userItem['nombre'].toString().toLowerCase();
+        return user.contains(query.toLowerCase()) ||
+               name.contains(query.toLowerCase());
+      }).toList();
+    }
+    notifyListeners();
   }
 }
 
