@@ -721,7 +721,7 @@ class UsuariosState extends State<Usuarios> {
             };
           }).toList();
 
-          await Provider.of<AdduserProvider>(context, listen: false)
+          final result = await Provider.of<AdduserProvider>(context, listen: false)
           .addUser(
             username, 
             name, 
@@ -730,13 +730,11 @@ class UsuariosState extends State<Usuarios> {
             estaciones
           );
 
-          await showFlushbar(
-            context,
-            "Registro exitoso",
-            Colors.green.shade400,
-            const Duration(seconds: 4),
-          );
-          Navigator.of(context).pop();
+          if(result['success']){
+            showFlushbar(context, result['message'], Colors.green.shade500, const Duration(seconds: 5));
+          }else{
+            showFlushbar(context, result['message'], Colors.red.shade600, const Duration(seconds: 5));
+          }
         }
       },
       style: ButtonStyle(

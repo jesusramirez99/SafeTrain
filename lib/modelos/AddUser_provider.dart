@@ -8,7 +8,7 @@ class AdduserProvider with ChangeNotifier {
   bool _isloading = false;
   bool get isloading => _isloading;
 
-  Future<void> addUser(
+  Future<Map<String, dynamic>> addUser(
     String username,
     String name,
     String email,
@@ -30,20 +30,29 @@ class AdduserProvider with ChangeNotifier {
               }),
           );
 
-          if(response.statusCode != 200){
-            throw Exception('Failed to insert user');
+          final decoded = json.decode(response.body);
+
+          if(response.statusCode == 200){
+            return {
+              "success": decoded["Response"]["success"],
+              "message": decoded["Response"]["message"]
+            };
+          }else{
+            return{
+              "success": false,
+              "message": "Error en el servidor: ${response.statusCode}"
+            };
           }
       }catch(e){
-        print('Error inserting user: $e');
+        return {
+          "success": false,
+          "message": "Error inesperado: $e",
+        };
       }finally{
         _isloading = false;
         notifyListeners();
       }
     }
-
-    
-  
-
 }
 
 
