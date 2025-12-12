@@ -98,11 +98,10 @@ class TablesTrainsProvider with ChangeNotifier {
         final Map<String, dynamic> jsonData = json.decode(response.body);
 
         if (jsonData['Consist'] != null &&
-            jsonData['Consist']['Result'] != null &&
-            jsonData['Consist']['Result']['wrapper'] != null &&
-            jsonData['Consist']['Result']['wrapper'] is Map) {
+            jsonData['Consist']['wrapper'] != null &&
+            jsonData['Consist']['wrapper'] is Map) {
           final Map<String, dynamic> _wrapper =
-              jsonData['Consist']['Result']['wrapper'];
+              jsonData['Consist']['wrapper'];
 
           final estacionActual = _wrapper['estacion_actual'];
           print('estacion actual: $estacionActual');
