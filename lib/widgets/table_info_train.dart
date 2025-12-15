@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:safe_train/modelos/regla_incumplida_provider.dart';
+import 'package:safe_train/modelos/tablas_tren_provider.dart';
 import 'package:safe_train/modelos/user_provider.dart';
 import 'package:table_sticky_headers/table_sticky_headers.dart';
-import 'package:safe_train/modelos/tablas_tren_provider.dart';
 
 class InfoTrainTable extends StatefulWidget {
   final String trainInfo;
@@ -211,10 +211,29 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
   }
 
   Widget _buildDataCell(List<String> rowData, int columnIndex, String regla,
-      Map<String, dynamic> item) {
-    String text = rowData[columnIndex];
-    bool esReglaF = regla == 'F';
+    Map<String, dynamic> item) {
+    final cell = rowData[columnIndex];
 
+    bool esReglaF = regla == 'F';
+    bool isColumnWeight = columnIndex == 4; 
+    Color textColor = Colors.black;
+    Color backgroundColor = Colors.transparent;
+
+   
+    if (esReglaF) {
+      textColor = Colors.red;
+    }else{
+      textColor = Colors.black;
+    }
+
+    if (isColumnWeight && (item['peso'] ?? 0) > 50) {
+      backgroundColor = const Color(0xFFFFCDD2); 
+      textColor = Colors.black;                  
+    }else if(isColumnWeight && (item['peso'] ?? 0) < 50){
+      backgroundColor = const Color(0xFFB3E5FC);
+      textColor = Colors.black;
+    }
+    
     return GestureDetector(
       onTap: () {
         if (esReglaF) {
@@ -225,6 +244,7 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
         padding: const EdgeInsets.all(8.0),
         alignment: Alignment.center,
         decoration: BoxDecoration(
+          color: backgroundColor,
           border: Border(
             top: BorderSide(color: Colors.grey.shade500),
             bottom: const BorderSide(color: Colors.black12),
@@ -233,7 +253,7 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (esReglaF && columnIndex == 0) // Solo en la columna "Secuencia"
+            if (esReglaF && columnIndex == 0) 
               IconButton(
                 icon: const Icon(Icons.warning_rounded, color: Colors.orange),
                 tooltip: 'Ver detalles de reglas inválidas',
@@ -243,14 +263,14 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
               ),
             const SizedBox(height: 6.0),
             Text(
-              text,
-              style: TextStyle(
-                fontSize: 15.0,
-                color: esReglaF ? Colors.red : Colors.black,
-                fontWeight: FontWeight.bold,
+                cell.toString(),
+                style: TextStyle(
+                  fontSize: 15.0,
+                  color: textColor,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
           ],
         ),
       ),

@@ -78,7 +78,7 @@ class _IndicatorTrainTableState extends State<IndicatorTrainTable> {
                 ),
               ),
               _buildSegment(_indicatorTrain, 0,
-              ['Carros Totales', 'Carros Cargados', 'Carros Vacios', 'Toneladas Totales', 'Longitud Total']),
+              ['Carros Totales', 'Toneladas Totales', 'Longitud Total']),
               const SizedBox(height: 25.0),
               Padding(
                 padding: const EdgeInsets.all(13.0),
