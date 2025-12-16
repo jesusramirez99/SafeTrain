@@ -229,7 +229,7 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
     if (isColumnWeight && (item['peso'] ?? 0) > 50) {
       backgroundColor = const Color(0xFFFFCDD2); 
       textColor = Colors.black;                  
-    }else if(isColumnWeight && (item['peso'] ?? 0) < 50){
+    }else if(isColumnWeight && (item['peso'] ?? 0) <= 50){
       backgroundColor = const Color(0xFFB3E5FC);
       textColor = Colors.black;
     }
