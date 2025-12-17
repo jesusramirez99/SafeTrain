@@ -68,7 +68,9 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
       'Peso\nArticulado',
       'Longitud',
       'Tipo\nLocomotora',
+      'Destino',
       'Lotear A',
+      'Entregar A',
       'Producto',
       'HG',
     ];
@@ -84,7 +86,9 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
         item['pesoArt'] == 0 ? '' : item['pesoArt'].toString(),
         item['longitud'].toString(),
         item['tipo_locomotora']?.toString() ?? '',
+        item['destino']?.toString() ?? '',
         item['lotearA'].toString(),
+        item['entregarA']?.toString() ?? '',
         item['producto'].toString(),
         item['hg'] == 0 ? '' : item['hg'].toString(),
       ];
@@ -145,7 +149,7 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
                       return baseWidth * 0.6;
                     } else if (headers[index] == 'Longitud') {
                       return baseWidth * 0.6;
-                    } else if (headers[index] == 'HG') {
+                    }else if (headers[index] == 'HG') {
                       return baseWidth * 0.5;
                     } else {
                       return baseWidth; // Distribución uniforme
