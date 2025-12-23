@@ -412,8 +412,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
       DataColumn2(label: _buildHeaderCell('Fecha\nOfrecido'), size: ColumnSize.S),
       DataColumn2(label: _buildHeaderCell('Estatus\nCCO'), size: ColumnSize.S),
       DataColumn2(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado'), size: ColumnSize.M),
-      //DataColumn2(label: _buildHeaderCell('Fecha Envío\n de Llamado'), size: ColumnSize.S),
-      //DataColumn2(label: _buildHeaderCell('Fecha\nLlamado'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Fecha Envío\n de Llamado'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Fecha\nLlamado'), size: ColumnSize.S),
       DataColumn2(label: _buildHeaderCell('Salida de \nTerminal'), size: ColumnSize.S)
     ];
   }
@@ -434,8 +434,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
       DataColumn(label: _buildHeaderCell('Estatus\nCCO')),
       DataColumn(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado')),
       //DataColumn(label: _buildHeaderCell('Autorizado')),
-      //DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
-      //DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
+      DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
+      DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
       DataColumn(label: _buildHeaderCell('Salida de \nTerminal'))
     ];
   }
@@ -546,7 +546,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
    
       
       // Fecha Envio de Llamado
-      /*_buildCellDateString(
+      _buildCellDateString(
         text: data['llamado_por']?.toString() ?? '', 
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox()
@@ -565,16 +565,33 @@ class _DataTrainTableState extends State<DataTrainTable> {
                   date: data['fecha_llamado']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
-      ),*/
+      ),
 
       // Fecha llamada completada
-      _buildCellDateString(
-        text: '', 
+      buildCellExitterminal(
+        widget: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'RC2    ',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10), // Espaciado entre las dos celdas
+            Text(
+              'AEI    ',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+
+      /*_buildCellDateString(
+        text: 'RC2', 
         widget: formattedDateCellTrainsOffered(
           date: '',
           format: 'dd/MM/yyyy \n HH:mm',
         ),
-      ),
+      ),*/
     ];    
   }
 
@@ -697,7 +714,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
       ),*/
 
       // Fecha Envio de Llamado
-      /*_buildCellDateString(
+      _buildCellDateString(
         text: data['llamado_por']?.toString() ?? '', 
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox() // Celda vacía si está rechazado
@@ -708,22 +725,31 @@ class _DataTrainTableState extends State<DataTrainTable> {
       ),
 
       // Fecha Llamado
-      DataCell(
-        Center(
-          child: data['autorizado'] == 'Rechazado'
-              ? const SizedBox()
+      _buildCellDateString(
+        text: data['llamado_por']?.toString() ?? '', 
+        widget: data['autorizado'] == 'Rechazado'
+              ? const SizedBox() // Celda vacía si está rechazado
               : formattedDateCell(
                   date: data['fecha_llamado']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
-        ),
-      ),*/
+      ),
 
       //Registro de salida
-      DataCell(
-        formattedDateCell(
-          date: '',
-          format: 'dd/MM/yyyy \n HH:mm:ss',
+      buildCellExitterminal(
+        widget: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'RC2    ',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10), // Espaciado entre las dos celdas
+            Text(
+              'AEI    ',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ),
     ];
@@ -811,6 +837,24 @@ class _DataTrainTableState extends State<DataTrainTable> {
       ),
     );
   }
+
+  DataCell buildCellExitterminal({
+    required Widget widget,
+  }) {
+    return DataCell(
+      Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Primer texto
+            widget,
+          ],
+        ),
+      ),
+    );
+  }
+
   DataCell _buildCellDateStringObservationsOffered({
     required String messageObservations,
     required String text,
