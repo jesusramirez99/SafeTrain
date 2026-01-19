@@ -330,7 +330,7 @@ class __DraggableAlertDialogState extends State<_DraggableAlertDialog> {
         child: AlertDialog(
           title: const Center(
             child: Text(
-              'Detalles de la regla incumplida',
+              'Descripción de las reglas incumplidas',
               style: TextStyle(
                 fontSize: 22.0,
                 fontWeight: FontWeight.bold,
