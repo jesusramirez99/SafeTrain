@@ -155,15 +155,9 @@ class TablesTrainsProvider with ChangeNotifier {
   }
 
   // FUNCION PARA REFRESCAR LA TABLA DESPUES DE VALIDAR EL TREN
-  Future<void> refreshTableDataTrain(
-      BuildContext context, String train, String estacion) async {
-    _isLoading = true;
-    _trainData = true;
-    notifyListeners();
-
+  Future<void> refreshTableDataTrain(BuildContext context, String train, String estacion) async {
     try {
-      final url = Uri.parse(
-          '${Enviroment.baseUrl}/getDataTren?idTren=$train&estacion=$estacion');
+      final url = Uri.parse('${Enviroment.baseUrl}/getDataTren?idTren=$train&estacion=$estacion');
       final response = await http.get(
         url,
         headers: {
@@ -184,16 +178,10 @@ class TablesTrainsProvider with ChangeNotifier {
 
           // Guardar el ID
           final ID = wrapperData['ID']?.toString();
-          if (ID != null && ID.isNotEmpty) {
-            // Verificar si ya hay un ID guardado
-            if (selectedID == null || selectedID!.isEmpty) {
-              // Solo guardar si no hay ninguno guardado
-              setSelectedID(ID);
-              print('ID guardado en el provider: $ID');
-            } else {
-              print('ID ya estaba guardado: $selectedID');
-              _trainData = false;
-            }
+          print('ID recibido de la API: $ID');
+          print('ID actualmente guardado en provider: $selectedID');
+          if(ID != null && ID.isNotEmpty){
+            setSelectedID(ID);
           }
          
           // Normalizar datos
@@ -208,21 +196,20 @@ class TablesTrainsProvider with ChangeNotifier {
           _dataTrain.add(wrapperData);
           notifyListeners();
         } else {
-          _showFlushbar(
-              context, 'El tren "$train" no fue encontrado, favor de revisar.');
-          print('Datos no encontrados para el tren "$train"');
-          _trainData = false;
+          _showFlushbar(context, 'El tren "$train" no fue encontrado, favor de revisar.');
+          //print('Datos no encontrados para el tren "$train"');
+          //_trainData = false;
         }
       } else {
         _showFlushbar(context, 'Error en la solicitud: ${response.statusCode}');
         print('Error en la solicitud: ${response.statusCode}');
-        _trainData = false;
+        //_trainData = false;
       }
     } catch (e) {
       _showFlushbar(context, 'Ocurrió un error: $e');
       print('Error: $e');
     } finally {
-      _isLoading = false;
+      //_isLoading = false;
       notifyListeners();
     }
   }
