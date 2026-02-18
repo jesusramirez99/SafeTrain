@@ -30,6 +30,7 @@ environment:
 dependencies:
   another_flushbar: ^1.12.30
   cupertino_icons: ^1.0.6
+  custom_date_picker: ^0.0.7
   data_table_2: ^2.6.0
   file_picker: ^10.2.0
   flutter:

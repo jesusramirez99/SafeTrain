@@ -65,6 +65,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  custom_date_picker:
+    dependency: "direct main"
+    description:
+      name: custom_date_picker
+      sha256: "507ccd6aa406781a704ea079cb7139e49ef7ff8e066ff17bf54130b6a9a2af2e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.7"
   data_table_2:
     dependency: "direct main"
     description:
