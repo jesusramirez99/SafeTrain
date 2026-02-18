@@ -14,6 +14,7 @@ import 'package:safe_train/modelos/reglas_incumplidas_tren.dart';
 import 'package:safe_train/modelos/tablas_tren_provider.dart';
 import 'package:safe_train/modelos/user_provider.dart';
 import 'package:safe_train/modelos/validacion_reglas_provider.dart';
+import 'package:safe_train/pages/home/home_page.dart';
 import 'package:safe_train/widgets/table_validation_history.dart';
 
 class MenuLateral extends StatefulWidget {
@@ -196,12 +197,10 @@ class MenuLateralState extends State<MenuLateral> {
   Widget _btnValidar(BuildContext context, double fontSize, double iconText) {
     final selectionNotifier = Provider.of<SelectionNotifier>(context);
     final buttonStateNotifier = Provider.of<ButtonStateNotifier>(context);
-    final selectedRow = Provider.of<SelectedRowModel>(context);
-
+    final selectedRow = Provider.of<SelectedRowModel>(context); 
     final trenProvider = Provider.of<TrainModel>(context, listen: false);
     final tren = trenProvider.selectedTrain;
-    final selectedEstacion =
-        Provider.of<EstacionesProvider>(context, listen: false);
+    final selectedEstacion = Provider.of<EstacionesProvider>(context, listen: false);
     final estacion = selectedEstacion.selectedEstacion;
     final validacionProvider = Provider.of<ValidacionReglasProvider>(context, listen: false);
     final userName = Provider.of<UserProvider>(context, listen: false);
@@ -216,7 +215,7 @@ class MenuLateralState extends State<MenuLateral> {
           onPressed: selectedRow.canValidate
                   ? () async {
                       try {
-                        print('si pudo validar');
+                        //print('si pudo validar');
                         _showFlushbar(
                           context,
                           'Validando el tren...',
@@ -228,7 +227,7 @@ class MenuLateralState extends State<MenuLateral> {
                         // Llamamos a validacionReglas para obtener las reglas validadas
                         bool isValid = await validacionProvider.validacionReglas(tren!, estacion!, '', user!, estacion);
 
-                        print('Reglas: ${isValid}');
+                        //print('Reglas: ${isValid}');
                         
                         if (isValid) {
                           _showFlushbar(context,
@@ -257,7 +256,7 @@ class MenuLateralState extends State<MenuLateral> {
                         } else {
                           final mensaje = _formatViolationRules(validacionProvider.reglasIncumplidas);
 
-                          print("Reglas incumplidas: ${validacionProvider.reglasIncumplidas}");
+                          //print("Reglas incumplidas: ${validacionProvider.reglasIncumplidas}");
                           
                           _showFlushbarReglas(
                             context,
@@ -448,15 +447,11 @@ class MenuLateralState extends State<MenuLateral> {
   Future<void> _refreshTable(BuildContext context) async {
     final tren = Provider.of<TrainModel>(context, listen: false);
     final train = tren.selectedTrain;
-    print('tren seleccionado: $train');
-
-    final tableProvider =
-        Provider.of<TablesTrainsProvider>(context, listen: false);
-    final estacionProvider =
-        Provider.of<EstacionesProvider>(context, listen: false);
+    //print('tren seleccionado: $train');
+    final tableProvider = Provider.of<TablesTrainsProvider>(context, listen: false);
+    final estacionProvider = Provider.of<EstacionesProvider>(context, listen: false);
     final estacion = estacionProvider.selectedEstacion;
-    print('estacion selccionada: $estacion');
-
+    //print('estacion selccionada: $estacion');
     await tableProvider.refreshTableDataTrain(context, train!, estacion!);
   }
 
@@ -597,7 +592,7 @@ class MenuLateralState extends State<MenuLateral> {
                                           final estacion = estacionProvider.selectedEstacion;
 
                                           String fechaOfrecido = DateFormat("yyyy-MM-ddTHH:mm:ss").format(DateTime.now());
-                                          print(tren);
+                                          //print(tren);
                                           
 
                                           await Provider.of<OfrecimientoTrenProvider>(context, listen: false)
@@ -613,10 +608,8 @@ class MenuLateralState extends State<MenuLateral> {
 
                                           Navigator.pop(context); // Cierra el loading
                                           Navigator.pop(context); // Cierra el modal
-                                          _refreshTable(context);
-
-                                          Provider.of<RechazosProvider>(context, listen: false)
-                                              .refreshRechazos(context, user);
+                                          reset();
+                                          Provider.of<RechazosProvider>(context, listen: false).refreshRechazos(context, user);
                                         } catch (error) {
                                           Navigator.pop(context); // Cierra el loading
                                           showDialog(
@@ -706,6 +699,38 @@ class MenuLateralState extends State<MenuLateral> {
         widget.toggleTableInfo();
       });
     });
+  }
+
+  void reset(){
+    // Limpiar selección en SelectionNotifier
+        Provider.of<SelectionNotifier>(context, listen: false)
+            .updateSelectedRow(null);
+
+        // Resetear estado de los botones en ButtonStateNotifier
+        final buttonStateNotifier =
+            Provider.of<ButtonStateNotifier>(context, listen: false);
+        buttonStateNotifier.setButtonState('indicador', false);
+        buttonStateNotifier.setButtonState('informacion', false);
+        buttonStateNotifier.setButtonState('validar', true);
+
+        // Limpiar datos de las tablas
+        final dataTrainProvider =
+            Provider.of<TablesTrainsProvider>(context, listen: false);
+        dataTrainProvider.clearData();
+
+        // Limpiar tren del icono de imprimir
+        final trenProvider = Provider.of<TrainModel>(context, listen: false);
+        trenProvider.clearData();
+
+        final estacionProvider =
+            Provider.of<EstacionesProvider>(context, listen: false);
+        estacionProvider.clearData();
+
+        // Navegar a la página de inicio y limpiar el historial de navegación
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const Home()),
+          (Route<dynamic> route) => false,
+        );
   }
 
   void _showFlushbar(BuildContext context, String message,

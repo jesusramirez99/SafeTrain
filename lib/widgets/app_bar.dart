@@ -199,16 +199,15 @@ class _CustomAppBarState extends State<CustomAppBar> {
           onOpened: () => ofrecimientoProvider.fetchRechazos(context, user),
           onSelected: (trainId) {
             selectionNotifier.updateSelectedRow(null);
+            
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const Home()),
               (Route<dynamic> route) => false,
             );
 
             trainProvider.setSelectedTrain(trainId);
-
             // Actualizar tabla con el tren seleccionado
-            Provider.of<TablesTrainsProvider>(context, listen: false)
-                .showTrenesRechazados(context, trainId);
+            Provider.of<TablesTrainsProvider>(context, listen: false).showTrenesRechazados(context, trainId);
             final selectedRowNotifier = Provider.of<SelectedRowModel>(context, listen: false);
             selectedRowNotifier.setSelectedRow(
               index: _selectedRowIndex, 

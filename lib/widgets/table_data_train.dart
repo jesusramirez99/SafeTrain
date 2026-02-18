@@ -547,11 +547,11 @@ class _DataTrainTableState extends State<DataTrainTable> {
       
       // Fecha Envio de Llamado
       _buildCellDateString(
-        text: data['llamado_por']?.toString() ?? '', 
+        text: data['autorizado_por']?.toString() ?? '', 
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox()
               : formattedDateCellTrainsOffered(
-                  date: data['fecha_llamado']?.toString() ?? '',
+                  date: data['fecha_autorizado']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
       ),
@@ -569,17 +569,17 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha llamada completada
       buildCellExitterminal(
-        widget: const Column(
+        widget: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'RC2    ',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              data['fecha_salida_rc2'] != null ? 'RC2  ${data['fecha_salida_rc2']}' : '',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10), // Espaciado entre las dos celdas
+            const SizedBox(height: 10), // Espaciado entre las dos celdas
             Text(
-              'AEI    ',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              data['fecha_salida_lector'] != null? 'AEI  ${data['fecha_salida_lector']}': '',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -715,11 +715,11 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha Envio de Llamado
       _buildCellDateString(
-        text: data['llamado_por']?.toString() ?? '', 
+        text: data['autorizado_por']?.toString() ?? '', 
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox() // Celda vacía si está rechazado
               : formattedDateCell(
-                  date: data['fecha_llamado']?.toString() ?? '',
+                  date: data['fecha_autorizado']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
       ),
@@ -737,17 +737,17 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       //Registro de salida
       buildCellExitterminal(
-        widget: const Column(
+        widget:  Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'RC2    ',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text( 
+              data['fecha_salida_rc2'] != null ? 'RC2  ${data['fecha_salida_rc2']}' : '',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10), // Espaciado entre las dos celdas
-            Text(
-              'AEI    ',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            const SizedBox(height: 10), // Espaciado entre las dos celdas
+            Text( 
+              data['fecha_salida_lector'] != null? 'AEI  ${data['fecha_salida_lector']}': '',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -877,20 +877,42 @@ class _DataTrainTableState extends State<DataTrainTable> {
                 onTap: () {
                   showDialog(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Observaciones"),
-                      content: Text(
-                        messageObservations.isEmpty
-                            ? 'Sin Observaciones'
-                            : messageObservations,
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Cerrar"),
-                        ),
-                      ],
-                    ),
+                    builder: (context) {
+                      Offset offset = const Offset(0, 0);
+                      return StatefulBuilder(
+                        builder: (context, setState){
+                          return Center(
+                            child: GestureDetector(
+                              onPanUpdate: (details){
+                                setState(() {
+                                  offset += details.delta;
+                                });
+                              },
+                              child: Transform.translate(
+                                offset: offset,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: AlertDialog(
+                                    title: const Text("Observaciones"),
+                                    content: Text(
+                                      messageObservations.isEmpty
+                                          ? 'Sin Observaciones'
+                                          : messageObservations,
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text("Cerrar"),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                      );
+                    }
                   );
                 },
                 child: Text(
@@ -935,20 +957,42 @@ class _DataTrainTableState extends State<DataTrainTable> {
                 onTap: () {
                   showDialog(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Observaciones"),
-                      content: Text(
-                        messageObservations.isEmpty
-                            ? 'Sin Observaciones'
-                            : messageObservations,
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Cerrar"),
-                        ),
-                      ],
-                    ),
+                    builder: (context) {
+                      Offset offset = const Offset(0, 0);
+                      return StatefulBuilder(
+                        builder: (context, setState){
+                          return Center(
+                            child: GestureDetector(
+                              onPanUpdate: (details) {
+                                setState(() {
+                                  offset += details.delta;
+                                });
+                              },
+                              child: Transform.translate(
+                                offset: offset,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: AlertDialog(
+                                    title: const Text("Observaciones"),
+                                    content: Text(
+                                      messageObservations.isEmpty
+                                          ? 'Sin Observaciones'
+                                          : messageObservations,
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text("Cerrar"),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                      );
+                    }
                   );
                 },
                 child: Text(
@@ -970,8 +1014,6 @@ class _DataTrainTableState extends State<DataTrainTable> {
       ),
     );
   }
-
-
 
   DataCell _buildStatusCell(
       String text, Color textColor, BuildContext context, [String? IdTren]) {
