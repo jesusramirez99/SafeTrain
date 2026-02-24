@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:safe_train/modales/modal_UpdateStationsUser.dart';
 import 'package:safe_train/modelos/user_provider.dart';
 
 class MdlVerUsers extends StatefulWidget {
@@ -36,7 +37,20 @@ class MdlVerDataUsers extends State<MdlVerUsers> {
   Future<void> mdlTablaUsers(BuildContext context) async { 
     final usersProvider = Provider.of<UsersProvider>(context, listen: false);
     await usersProvider.mostrarUsers();
-    usersDataTable = UsersDataTable(usersProvider.filtradoUsuarios);
+    usersDataTable = UsersDataTable(usersProvider.filtradoUsuarios,
+      (int userId) async {
+        await showDialog(
+          context: context,
+          barrierDismissible: false, 
+          builder: (_) => ModalUpdatestationsuser(userId: userId),
+        );
+
+        // 🔹 Opcional: refrescar la tabla si necesitas
+        /*final usersProvider = Provider.of<UsersProvider>(context, listen: false);
+        await usersProvider.mostrarUsers();
+        usersDataTable.actualizarFiltradoUser(usersProvider.filtradoUsuarios);*/
+      }
+    );
     return showDialog(
       context: context, 
       barrierDismissible: false,
@@ -125,6 +139,7 @@ class MdlVerDataUsers extends State<MdlVerUsers> {
       DataColumn(label: _buildHeaderCell('Correo')),
       DataColumn(label: _buildHeaderCell('Rol')),
       DataColumn(label: _buildHeaderCell('Estaciones')),
+      DataColumn(label: _buildHeaderCell('Acciones')),
     ];
   }
 
@@ -205,7 +220,8 @@ class MdlVerDataUsers extends State<MdlVerUsers> {
 
 class UsersDataTable extends DataTableSource {
   List<Map<String, dynamic>> usuarios;
-  UsersDataTable(this.usuarios);
+  final Function(int userId) onEdit;
+  UsersDataTable(this.usuarios, this.onEdit);
   //late List<Map<String, dynamic>> userFiltrado;
 
 
@@ -240,8 +256,18 @@ class UsersDataTable extends DataTableSource {
             width: double.infinity,
             child: Text((user['ESTACIONES'] as List<dynamic>?) ?.map((e) => e['Estacion']).join(', ') ?? '', textAlign: TextAlign.center, softWrap: true, maxLines: null),
           ),
-        ),
           
+        ),
+        DataCell(
+          Center(
+            child: IconButton(
+              icon: const Icon(Icons.mode_edit_outline, color: Colors.blue),
+              tooltip: 'Editar estaciones',
+              onPressed: (){
+                onEdit(user['id']);
+              }, 
+            ),
+        )),  
       ],
     );
   }
