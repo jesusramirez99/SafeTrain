@@ -15,8 +15,8 @@ class Usuarios extends StatefulWidget {
 }
 
 class UsuariosState extends State<Usuarios> {
-  final ValueNotifier<List<String>> _addedEstacionesNotifier =
-      ValueNotifier<List<String>>([]);
+  final ValueNotifier<List<Map<String, String>>> _addedEstacionesNotifier =
+    ValueNotifier<List<Map<String, String>>>([]);
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final bool _isloading = false;
   int selectedRoleId = 0;
@@ -383,42 +383,45 @@ class UsuariosState extends State<Usuarios> {
                                             children: [
                                               ElevatedButton(
                                                 onPressed: () {
-                                                  final String nuevaEstacion =
-                                                      _autocompleteController!
-                                                          .text
-                                                          .trim();
-                                                  if (nuevaEstacion
-                                                          .isNotEmpty &&
-                                                      nuevaEstacion !=
-                                                          'Seleccione una Estación') {
+                                                  final String nuevaEstacion = _autocompleteController?.text.trim() ?? '';
+                                                  if (nuevaEstacion.isEmpty || nuevaEstacion == 'Seleccione una Estación') {
                                                     // Verifica si ya existe
-                                                    if (_addedEstacionesNotifier
-                                                        .value
-                                                        .contains(
-                                                            nuevaEstacion)) {
-                                                      setState(() {
-                                                        _errorEstacion =
-                                                            'La estación ya está agregada';
-                                                      });
-                                                    } else {
-                                                      final newList = List<
-                                                              String>.from(
-                                                          _addedEstacionesNotifier
-                                                              .value)
-                                                        ..add(nuevaEstacion);
-                                                      _addedEstacionesNotifier
-                                                          .value = newList;
-                                                      _autocompleteController
-                                                          ?.clear();
-                                                      setState(() {
-                                                        _errorEstacion = null;
-                                                        _selectedEstacion =
-                                                            nuevaEstacion;
-                                                      });
-                                                      print(
-                                                          "Estaciones después de agregar: ${_addedEstacionesNotifier.value.length}");
-                                                    }
+                                                    setState(() {
+                                                      _errorEstacion = 'Seleccione una estacion valida';
+                                                    });
+                                                    return;
                                                   }
+
+                                                  if (_selectedRegion == 'Seleccione una Región') {
+                                                    setState(() {
+                                                      _errorEstacion = 'Seleccione una región primero';
+                                                    });
+                                                    return;
+                                                  }
+
+                                                  final nuevaEntrada = {
+                                                    "Region": _selectedRegion,
+                                                    "Estacion": nuevaEstacion,
+                                                  };
+
+                                                  final yaExiste = _addedEstacionesNotifier.value.any((element) =>
+                                                      element["Region"] == _selectedRegion &&
+                                                      element["Estacion"] == nuevaEstacion);
+
+                                                  if (yaExiste) {
+                                                    setState(() {
+                                                      _errorEstacion =
+                                                          'La estación ya está agregada para esta región';
+                                                    });
+                                                    return;
+                                                  }
+
+                                                  final newList = List<Map<String, String>>.from(_addedEstacionesNotifier.value)..add(nuevaEntrada);
+                                                  _addedEstacionesNotifier.value = newList;
+                                                  _autocompleteController?.clear();
+                                                  setState(() {
+                                                    _errorEstacion = null;
+                                                  });
                                                 },
                                                 child:
                                                     _btnAddEstacion(), // Tu método o widget que define el contenido del botón
@@ -434,7 +437,7 @@ class UsuariosState extends State<Usuarios> {
                             ),
                           ),
                         ),
-                        ValueListenableBuilder<List<String>>(
+                        ValueListenableBuilder<List<Map<String, String>>>(
                           valueListenable: _addedEstacionesNotifier,
                           builder: (context, estaciones, _) {
                             print(
@@ -450,13 +453,14 @@ class UsuariosState extends State<Usuarios> {
                               runSpacing: 4.0,
                               children: estaciones.map((estacion) {
                                 return Chip(
-                                  label: Text(estacion),
+                                  label: Text(
+                                    "${estacion['Estacion']}",
+                                  ),
                                   backgroundColor: Colors.blue.shade100,
                                   deleteIcon: Icon(Icons.close, color: Colors.red),
                                   onDeleted: () {
-                                    setState(() {
-                                      estaciones.remove(estacion);
-                                    });
+                                    final newList = List<Map<String, String>>.from(estaciones)..remove(estacion);
+                                    _addedEstacionesNotifier.value = newList;
                                   },
                                 );
                               }).toList(),
@@ -714,12 +718,7 @@ class UsuariosState extends State<Usuarios> {
           final name = _nameController.text.trim();
           final email = emailController.text.trim();
           final roleId = selectedRoleId;
-          final estaciones = _addedEstacionesNotifier.value.map((station) {
-            return {
-              "Region": regionSelected,
-              "Estacion": station,
-            };
-          }).toList();
+          final estaciones = _addedEstacionesNotifier.value;
 
           final result = await Provider.of<AdduserProvider>(context, listen: false)
           .addUser(

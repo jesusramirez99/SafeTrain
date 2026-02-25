@@ -12,7 +12,7 @@ class UpdatestationsuserProvider with ChangeNotifier {
   )async {
 
     try{
-      final uri = Uri.parse('${Enviroment.baseUrl}/api/updateEstacionesUser?userId=$userId');
+      final uri = Uri.parse('${Enviroment.baseUrl}/updateEstacionesUser?userId=$userId');
         final response = await http.put(uri, headers: {
           'Content-Type': 'application/json',
         },

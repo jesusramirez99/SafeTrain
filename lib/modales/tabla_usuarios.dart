@@ -38,18 +38,29 @@ class MdlVerDataUsers extends State<MdlVerUsers> {
     final usersProvider = Provider.of<UsersProvider>(context, listen: false);
     await usersProvider.mostrarUsers();
     usersDataTable = UsersDataTable(usersProvider.filtradoUsuarios,
-      (int userId) async {
-        await showDialog(
+      (
+        int id,
+        List estaciones,
+        String username,
+        String nombre,
+      ) async {
+        final result = await showDialog(
           context: context,
-          barrierDismissible: false, 
-          builder: (_) => ModalUpdatestationsuser(userId: userId),
+          barrierDismissible: false,
+          builder: (dialogContext) => ModalUpdatestationsuser(
+            userId: id,
+            estaciones: estaciones,
+            username: username,
+            nombre: nombre,
+          ),
         );
-
-        // 🔹 Opcional: refrescar la tabla si necesitas
-        /*final usersProvider = Provider.of<UsersProvider>(context, listen: false);
-        await usersProvider.mostrarUsers();
-        usersDataTable.actualizarFiltradoUser(usersProvider.filtradoUsuarios);*/
-      }
+        if(result == true){
+          await usersProvider.mostrarUsers();
+          busquedaController.clear();
+          usersProvider.filtrarUser('');
+          usersDataTable.actualizarFiltradoUser(usersProvider.filtradoUsuarios);
+        }
+      },
     );
     return showDialog(
       context: context, 
@@ -220,7 +231,13 @@ class MdlVerDataUsers extends State<MdlVerUsers> {
 
 class UsersDataTable extends DataTableSource {
   List<Map<String, dynamic>> usuarios;
-  final Function(int userId) onEdit;
+  final Function(
+  int id,
+  List estaciones,
+  String username,
+  String nombre,
+) onEdit;
+
   UsersDataTable(this.usuarios, this.onEdit);
   //late List<Map<String, dynamic>> userFiltrado;
 
@@ -263,11 +280,16 @@ class UsersDataTable extends DataTableSource {
             child: IconButton(
               icon: const Icon(Icons.mode_edit_outline, color: Colors.blue),
               tooltip: 'Editar estaciones',
-              onPressed: (){
-                onEdit(user['id']);
+              onPressed: () {
+                onEdit(
+                  user['id'],
+                  user['ESTACIONES'],
+                  user['username'],
+                  user['nombre'],
+                );
               }, 
             ),
-        )),  
+        )),
       ],
     );
   }
@@ -284,6 +306,8 @@ class UsersDataTable extends DataTableSource {
   void actualizarFiltradoUser(List<Map<String, dynamic>> nuevosDatosFiltrados){
     usuarios = nuevosDatosFiltrados;
     notifyListeners();
-  }    
+  }
+
+     
 }
 
