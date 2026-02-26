@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:safe_train/modelos/UpdateStationsUser_provider.dart';
@@ -24,10 +25,8 @@ class ModalUpdatestationsuser extends StatefulWidget {
 }
 
 class _ModalUpdatestationsuserState extends State<ModalUpdatestationsuser> {
-  final ValueNotifier<List<Map<String, String>>> _addedEstacionesNotifier =
-      ValueNotifier<List<Map<String, String>>>([]);
+  final ValueNotifier<List<Map<String, String>>> _addedEstacionesNotifier = ValueNotifier<List<Map<String, String>>>([]);
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
   String _selectedRegion = 'Seleccione una Región';
   String _selectedDivision = 'Seleccione una División';
   String _selectedEstacion = 'Seleccione una Estación';
@@ -502,26 +501,46 @@ class _ModalUpdatestationsuserState extends State<ModalUpdatestationsuser> {
   }
 
   Widget _btnRegistrar(BuildContext context) {
-  return ElevatedButton(
-    onPressed: () async {
-      final estacionesAEnviar = _addedEstacionesNotifier.value;
-      final userId = widget.userId;
-      final provider = Provider.of<UpdatestationsuserProvider>(context, listen: false);
-      final result = await provider.updateEstacionesUser(userId, estacionesAEnviar);
-      if (result["success"] == true) {
-        Navigator.of(context).pop(true); // cerramos el modal
-      }
-    },
-    style: ButtonStyle(
-      backgroundColor: MaterialStateProperty.all<Color>(Colors.grey.shade300),
-    ),
-    child: Row(
-      children: const [
-        Icon(Icons.app_registration, color: Colors.green, size: 18.0),
-        SizedBox(width: 5.0),
-        Text('Registrar'),
-      ],
-    ),
-  );
-}
+    return ElevatedButton(
+      onPressed: () async {
+        final estacionesAEnviar = _addedEstacionesNotifier.value;
+        final userId = widget.userId;
+        final provider = Provider.of<UpdatestationsuserProvider>(context, listen: false);
+        final result = await provider.updateEstacionesUser(userId, estacionesAEnviar);
+        if (result["success"] == true) {
+          Navigator.of(context).pop(true);
+          showFlushbar(context, result['message'], Colors.green.shade500, const Duration(seconds: 5));
+        }else{
+          showFlushbar(context, result['message'], Colors.red.shade600, const Duration(seconds: 5));
+        }
+      },
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all<Color>(Colors.grey.shade300),
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.app_registration, color: Colors.green, size: 18.0),
+          SizedBox(width: 5.0),
+          Text('Registrar'),
+        ],
+      ),
+    );
+  }
+
+  // Mensaje de flushbar
+  Future<void> showFlushbar(
+      BuildContext context, String message, Color color, Duration duration) {
+    return Flushbar(
+      duration: duration,
+      flushbarPosition: FlushbarPosition.TOP,
+      margin: const EdgeInsets.all(1.0),
+      borderRadius: BorderRadius.circular(5.0),
+      backgroundColor: color,
+      messageText: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: const TextStyle(color: Colors.white),
+      ),
+    ).show(context);
+  }
 }

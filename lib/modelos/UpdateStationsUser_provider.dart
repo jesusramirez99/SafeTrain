@@ -22,7 +22,7 @@ class UpdatestationsuserProvider with ChangeNotifier {
 
       if(response.statusCode == 200){
         return{
-          "success": decoded["Response"]?["success"] ?? true,
+          "success": decoded["Response"]?["success"] ?? false,
           "message": decoded["Response"]?["message"] ?? "Estaciones actualizadas correctamente"
         };
       }else{
@@ -31,13 +31,11 @@ class UpdatestationsuserProvider with ChangeNotifier {
           "message": "Error del servidor: ${response.statusCode}"
         };
       }
-
     }catch(e){
       return{
         "success": false,
         "message": "Error inesperado: $e"
       };
     }finally{}
-
   }
 }
