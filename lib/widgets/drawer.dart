@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:safe_train/modales/crudUsuarios.dart';
 import 'package:safe_train/modales/crud_carros_abiertos.dart';
 import 'package:safe_train/modales/crud_carros_tender.dart';
 import 'package:safe_train/modales/crud_reglas.dart';
 import 'package:safe_train/modales/crud_stcc.dart';
-import 'package:safe_train/modales/crud_usuarios.dart';
 import 'package:safe_train/modales/export_consist.dart';
 import 'package:safe_train/modales/tabla_carros_abiertos.dart';
 import 'package:safe_train/modales/tabla_carros_tender.dart';
@@ -225,7 +225,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
             style: _styleTextOpciones(),
           ),
           onTap: () {
-            UsuariosState().mdlUsuarios(context);
+            showDialog(
+              context: context, barrierDismissible: false ,builder: (BuildContext context) {
+                return const MdlUsuarios();
+              });
           },
         ),
       ],
