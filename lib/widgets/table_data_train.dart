@@ -479,9 +479,13 @@ class _DataTrainTableState extends State<DataTrainTable> {
         );
       }
     }
-
+    
     return [
-      _buildCell(data['IdTren']?.toString() ?? '', Colors.black),
+      _buildCellIdTrain( 
+        id: data['IdTren']?.toString() ?? '',
+        station: data['estacion_actual']?.toString() ?? '',
+      ),
+
       _buildCell(data['estacion_actual']?.toString() ?? '', Colors.black),
       _buildCell(
         '${'Cargados'.padRight(15)}${data['cargados'] ?? ''}\n'
@@ -851,6 +855,40 @@ class _DataTrainTableState extends State<DataTrainTable> {
             widget,
           ],
         ),
+      ),
+    );
+  }
+
+  DataCell _buildCellIdTrain({
+    required String id,
+    //required String ffc,
+    required String station,
+    Color color = Colors.black,
+  }){
+    return DataCell(
+      Center(
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child:  GestureDetector(
+            onTap: () {
+              final trainProvider = Provider.of<TablesTrainsProvider>(context, listen: false);
+              trainProvider.refreshTableDataTrain(
+                context, 
+                id,  
+                station
+              );
+            },
+            child: Text(
+              id,
+              style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+              textAlign:  TextAlign.center,
+            ),
+          ),
+        ),  
       ),
     );
   }

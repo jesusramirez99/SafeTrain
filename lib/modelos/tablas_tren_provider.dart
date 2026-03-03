@@ -156,6 +156,8 @@ class TablesTrainsProvider with ChangeNotifier {
 
   // FUNCION PARA REFRESCAR LA TABLA DESPUES DE VALIDAR EL TREN
   Future<void> refreshTableDataTrain(BuildContext context, String train, String estacion) async {
+    _isLoading = true;
+    _trainData = false;
     try {
       final url = Uri.parse('${Enviroment.baseUrl}/getDataTren?idTren=$train&estacion=$estacion');
       final response = await http.get(
@@ -194,8 +196,10 @@ class TablesTrainsProvider with ChangeNotifier {
           // Limpiar y actualizar lista
           _dataTrain = [];
           _dataTrain.add(wrapperData);
+          _trainData = _dataTrain.isNotEmpty;
           notifyListeners();
         } else {
+          _trainData = false;
           _showFlushbar(context, 'El tren "$train" no fue encontrado, favor de revisar.');
           //print('Datos no encontrados para el tren "$train"');
           //_trainData = false;
@@ -206,10 +210,11 @@ class TablesTrainsProvider with ChangeNotifier {
         //_trainData = false;
       }
     } catch (e) {
+      _trainData = false;
       _showFlushbar(context, 'Ocurrió un error: $e');
       print('Error: $e');
     } finally {
-      //_isLoading = false;
+      _isLoading = false;
       notifyListeners();
     }
   }
