@@ -12,6 +12,7 @@ import 'package:safe_train/modelos/ofrecimiento_tren_provider.dart';
 import 'package:safe_train/modelos/rechazos_tren_provider.dart';
 import 'package:safe_train/modelos/tablas_tren_provider.dart';
 import 'package:safe_train/modelos/user_provider.dart';
+import 'package:safe_train/widgets/HoverTrainTextState.dart';
 
 class DataTrainTable extends StatefulWidget {
   final List<Map<String, dynamic>> data;
@@ -867,28 +868,11 @@ class _DataTrainTableState extends State<DataTrainTable> {
   }){
     return DataCell(
       Center(
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child:  GestureDetector(
-            onTap: () {
-              final trainProvider = Provider.of<TablesTrainsProvider>(context, listen: false);
-              trainProvider.refreshTableDataTrain(
-                context, 
-                id,  
-                station
-              );
-            },
-            child: Text(
-              id,
-              style: TextStyle(
-                fontSize: 15.0,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-              textAlign:  TextAlign.center,
-            ),
-          ),
-        ),  
+        child: HoverTrainText(
+          id: id, 
+          station: station, 
+          color: color
+        ),
       ),
     );
   }
@@ -1307,3 +1291,5 @@ class _DataTrainTableState extends State<DataTrainTable> {
     await tableProvider.refreshTableDataTrain(context, train!, estacion!);
   }
 }
+
+

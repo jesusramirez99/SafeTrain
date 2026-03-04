@@ -284,7 +284,7 @@ class CuerpoState extends State<Cuerpo> {
                         children: <Widget>[
                           SizedBox(width: isLaptop ? 50.0 : 155.0),
                           textos('Tren'),
-                          SizedBox(width: isLaptop ? 15.0 : 25.0),
+                          SizedBox(width: isLaptop ? 15.0 : 12.0),
                           TextFieldIdTrain(
                             focusNode: _focusNode,
                             idTrainController: _idTrainController,
@@ -292,7 +292,7 @@ class CuerpoState extends State<Cuerpo> {
                           ),
                           SizedBox(width: isLaptop? 20.0 : 40.0),
                           textos('Fecha'),
-                          SizedBox(width: isLaptop? 0.5 : 1.0),
+                          SizedBox(width: isLaptop? 5.0 : 1.0),
                           Fecha(
                             fechaController: _fechaController,
                             isEnabled: !_enabledFecha,
@@ -501,7 +501,7 @@ class CuerpoState extends State<Cuerpo> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           width: isLaptop? 170.0 : 220.0,
-          height: isLaptop? 40.0 : 45.0,
+          height: isLaptop? 40.0 : 55.0,
           child: estaciones.isEmpty
               ? const Center(child: CircularProgressIndicator())
               : Autocomplete<String>(
