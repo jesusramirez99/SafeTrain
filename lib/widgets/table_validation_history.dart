@@ -148,10 +148,10 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         fecha = '$start-$end';
       }
 
-      if(trenId.isEmpty || fecha.isEmpty /*|| estacion.isEmpty*/){
+      if(trenId.isEmpty && fecha.isEmpty && estacion.isEmpty){
         _showFlushbar(
           context, 
-          'Favor de ingresar tren, fecha y estacion', 
+          'Favor de ingresar al menos un dato de busqueda', 
           Colors.red.shade400,
         );
         return;
@@ -171,7 +171,8 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         formattedTrenId = trenId; // Sin espacios
       }
 
-      final searchQuery = '$formattedTrenId$fecha';
+      final searchQuery = '$formattedTrenId$fecha$estacion';
+      print("busqueda: $searchQuery");
       print('busqueda:'+searchQuery);
 
       await provider.historialValidaciones(searchQuery);
@@ -555,12 +556,12 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'RC2 ${record['fecha_salida_rc2']?.toString() ?? ''}',
+                record['fecha_salida_rc2'] != null? 'RC2 ${record['fecha_salida_rc2']}' : '',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 10), // Espaciado entre las dos celdas
+              const SizedBox(height: 10), // Espaciado entre las dos celdas
               Text(
-                'AEI ${record['fecha_salida_lector']?.toString() ?? ''}',
+                record['fecha_salida_lector'] != null? 'AEI ${record['fecha_salida_lector']}' : '',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],

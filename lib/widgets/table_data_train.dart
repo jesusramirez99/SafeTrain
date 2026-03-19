@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -149,7 +150,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
           builder: (context, constraints) {
             const double rowHeight = 70;
             double screenHeight = MediaQuery.of(context).size.height;
-            double reserveSpace = 360;
+            double reserveSpace = 341;
             double maxHeight = isLaptop ? screenHeight - reserveSpace : 800 ;
             const double headingHeight = 48;
             //double maxHeight =  isLaptop? 238 : 800;
@@ -157,26 +158,36 @@ class _DataTrainTableState extends State<DataTrainTable> {
             
             return SizedBox(
               height: tableHeight.toDouble(),
-              child: DataTable2(
-                headingRowHeight: headingHeight,
-                dataRowHeight: rowHeight,
-                horizontalMargin: 8,
-                columnSpacing: 12,
-                minWidth: 1530,
-                border: TableBorder(
-                  horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
-                  verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
-                ),
-                decoration: _cabeceraTabla(),
-                columns: _buildColumnsTrainStatusTrainsOffered(),
-                rows: filteredTrains.map((train) => DataRow(
-                  color: MaterialStateColor.resolveWith((states) =>
-                      states.contains(MaterialState.selected)
-                          ? const Color.fromARGB(255, 226, 237, 247)
-                          : (filteredTrains.indexOf(train) % 2 == 0 ? Colors.white : Colors.grey.shade100)
+              width: double.infinity,
+              child: ScrollConfiguration(
+                behavior: const MaterialScrollBehavior().copyWith(
+                  dragDevices: {
+                    PointerDeviceKind.touch,
+                    PointerDeviceKind.mouse,
+                    PointerDeviceKind.trackpad,
+                  }
+                ), 
+                child: DataTable2(
+                  headingRowHeight: headingHeight,
+                  dataRowHeight: rowHeight,
+                  horizontalMargin: 8,
+                  columnSpacing: 12,
+                  minWidth: 1530,
+                  border: TableBorder(
+                    horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+                    verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
                   ),
-                  cells: _buildCellsTrainStatusTrainsOffered(train),
-                )).toList(),
+                  decoration: _cabeceraTabla(),
+                  columns: _buildColumnsTrainStatusTrainsOffered(),
+                  rows: filteredTrains.map((train) => DataRow(
+                    color: MaterialStateColor.resolveWith((states) =>
+                        states.contains(MaterialState.selected)
+                            ? const Color.fromARGB(255, 226, 237, 247)
+                            : (filteredTrains.indexOf(train) % 2 == 0 ? Colors.white : Colors.grey.shade100)
+                    ),
+                    cells: _buildCellsTrainStatusTrainsOffered(train),
+                  )).toList(),
+                ), 
               ),
             );
           },
@@ -184,7 +195,6 @@ class _DataTrainTableState extends State<DataTrainTable> {
       ],
     );
   }
-
 
   //Tabla de datos de tren
   Widget _buildTableDataTrain(){   
@@ -442,6 +452,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
   }
 
   List<DataCell> _buildCellsTrainStatusTrainsOffered(Map<String, dynamic> data){
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     Provider.of<TablesTrainsProvider>(context);
     Provider.of<TrainModel>(context, listen: false);
 
@@ -489,9 +500,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       _buildCell(data['estacion_actual']?.toString() ?? '', Colors.black),
       _buildCell(
-        '${'Cargados'.padRight(15)}${data['cargados'] ?? ''}\n'
-        '${'Vacios'.padRight(18)}${data['vacios'] ?? ''}\n'
-        '${'Total'.padRight(20)}${data['carros'] ?? ''}\n',
+        '${'Cargados'.padRight(isLaptop? 10 : 15)}${(data['cargados'] ?? '').toString().padLeft(5)}\n'
+        '${'Vacios'.padRight(isLaptop? 10 : 15)}${(data['vacios'] ?? '').toString().padLeft(8)}\n'
+        '${'Total'.padRight(isLaptop?  10 : 15)}${(data['carros'] ?? '').toString().padLeft(10)}\n',
         Colors.black,
       ),
 
@@ -552,7 +563,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
       
       // Fecha Envio de Llamado
       _buildCellDateString(
-        text: data['autorizado_por']?.toString() ?? '', 
+        text: data['autorizado'] == 'Rechazado'? '' : data['autorizado_por']?.toString() ?? '', 
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox()
               : formattedDateCellTrainsOffered(
@@ -563,7 +574,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha Llamado
       _buildCellDateString(
-        text: data['llamado_por']?.toString() ?? '', 
+        text: data['autorizado'] == 'Rechazado'? '' : data['llamado_por']?.toString() ?? '', 
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox()
               : formattedDateCellTrainsOffered(
@@ -604,6 +615,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
   //CELDA PARA TABLA DE INFORMACION DE TREN
   List<DataCell> _buildCells(Map<String, dynamic> data) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     Provider.of<TablesTrainsProvider>(context);
     Provider.of<TrainModel>(context, listen: false);
 
@@ -653,9 +665,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
       //_buildCell(data['cargados']?.toString() ?? '', Colors.black),
       //_buildCell(data['vacios']?.toString() ?? '', Colors.black),
       _buildCell(
-        '${'Cargados'.padRight(15)}${data['cargados'] ?? ''}\n'
-        '${'Vacios'.padRight(18)}${data['vacios'] ?? ''}\n'
-        '${'Total'.padRight(20)}${data['carros'] ?? ''}\n',
+        '${'Cargados'.padRight( isLaptop? 8 : 20)}${(data['cargados'] ?? '').toString().padLeft(5)}\n'
+        '${'Vacios'.padRight(isLaptop? 8 : 20)}${(data['vacios'] ?? '').toString().padLeft(8)}\n'
+        '${'Total'.padRight(isLaptop? 8 : 20)}${(data['carros'] ?? '').toString().padLeft(10)}\n',
         Colors.black,
       ),
 
@@ -720,7 +732,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha Envio de Llamado
       _buildCellDateString(
-        text: data['autorizado_por']?.toString() ?? '', 
+        text: data['autorizado'] == 'Rechazado' ? '' : data['autorizado_por']?.toString() ?? '', 
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox() // Celda vacía si está rechazado
               : formattedDateCell(
@@ -731,7 +743,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha Llamado
       _buildCellDateString(
-        text: data['llamado_por']?.toString() ?? '', 
+        text: data['autorizado'] == 'Rechazado'? '' : data['llamado_por']?.toString() ?? '', 
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox() // Celda vacía si está rechazado
               : formattedDateCell(
