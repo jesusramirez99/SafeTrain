@@ -359,8 +359,6 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
             rangeSelected.value = false;
           },
         ),
-        const SizedBox(width: 550),
-        iconPrint(context),
       ],
     );  
   }
@@ -377,8 +375,6 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
       ),
     );
   }
-
-
 
   Widget _buildDataTable(List<Map<String, dynamic>> validationHistory,
       bool isScrollable, BuildContext context) {
@@ -445,6 +441,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
   }
 
   DataRow _buildDataRow(Map<String, dynamic> record, BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     //final trenProvider = Provider.of<MotRechazoObs>(context, listen: true);
     //final idProvider = Provider.of<IdTren>(context, listen: false);
 
@@ -476,9 +473,9 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         _buildDataCell(record['destino'] ?? '', Colors.black, context),
         _buildDataCell(record['estacion_actual'] ?? '', Colors.black, context),
         _buildDataCellCars(
-          '${'Cargados'.padRight(15)}${record['cargados'] ?? ''}\n'
-          '${'Vacios'.padRight(18)}${record['vacios'] ?? ''}\n'
-          '${'Total'.padRight(20)}${record['carros'] ?? ''}\n',
+          '${'Cargados'.padRight(isLaptop? 8 : 20)}${(record['cargados'] ?? '').toString().padLeft(5)}\n'
+          '${'Vacios'.padRight(isLaptop? 8 : 20)}${(record['vacios'] ?? '').toString().padLeft(8)}\n'
+          '${'Total'.padRight(isLaptop? 8 : 20)}${(record['carros'] ?? '').toString().padLeft(10)}\n',
           Colors.black, context
         ),
 
@@ -774,48 +771,6 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
               fontSize: 16,
               color: Colors.red.shade400,
               fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  Widget iconPrint(BuildContext context) {
-    /*final trenProvider = Provider.of<TrainModel>(context, listen: false);
-    final tren = trenProvider.selectedTrain;
-    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
-    final estacionProvider =
-        Provider.of<EstacionesProvider>(context, listen: false);
-    final estacion = estacionProvider.selectedEstacion;*/
-    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
-
-    return Tooltip(
-      message: 'Consist de tren',
-      child: InkWell(
-        /*onTap: _iconPrintEnable
-            ? () {
-                if (tren == null || tren.isEmpty) {
-                  showFlushbar('No hay tren seleccionado', Colors.red);
-                  return;
-                }
-
-                if (estacion == null || estacion.isEmpty) {
-                  showFlushbar(
-                      'No hay tren ni estacion seleccionada', Colors.red);
-                  return;
-                }
-
-                showFlushbar(
-                    'Descargando archivo para Tren: $tren', Colors.green);
-
-                final excelProvider =
-                    Provider.of<ExcelDownloadProvider>(context, listen: false);
-                excelProvider.descargarExcel(tren, estacion);
-              }
-            : null,*/
-        child: Icon(
-          Icons.print,
-          size: isLaptop? 28.0 : 23.0,
-          color: Colors.black,
         ),
       ),
     );
