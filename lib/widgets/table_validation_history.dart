@@ -6,9 +6,11 @@ import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train/modales/motivos_rechazos_obs_id.dart';
 import 'package:safe_train/modelos/change_notifier_provider.dart';
+import 'package:safe_train/modelos/estaciones_provider.dart';
 import 'package:safe_train/modelos/historico_validacion_trenes_provider.dart';
 import 'package:safe_train/modelos/rechazos_observaciones_data_provider.dart';
 import 'package:safe_train/modelos/user_provider.dart';
+import 'package:safe_train/widgets/HoverTrainTextHistory.dart';
 import 'package:safe_train/widgets/custom_date.dart';
 
 class HistorialValidacionesModal extends StatefulWidget {
@@ -40,7 +42,6 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
   final ValueNotifier<bool> singleSelected = ValueNotifier(false);
   final ValueNotifier<bool> rangeSelected = ValueNotifier(false);
 
-
   @override
   void dispose() {
     controllertren.dispose();
@@ -53,7 +54,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
     final provider = Provider.of<HistorialValidacionesProvider>(context);
     final trenProvider = Provider.of<TrainModel>(context, listen: false);
     final tren = trenProvider.selectedTrain;
-
+    
 
     return FutureBuilder(
       future: widget.historialFuture ?? Future.value(), // Manejar Future null
@@ -74,13 +75,19 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         final validationHistory = provider.validationHistory;
         bool isScrollable = validationHistory.isNotEmpty;
 
+        final validationHistoryTrain = provider.validationHistoryTrain;
+        bool isScrollableTrain = validationHistoryTrain.isNotEmpty;
+
+        final informationHistoryTrain = provider.infoHistoryTrain;
+        bool isScrollableInfoTrain = informationHistoryTrain.isNotEmpty;
+
         return Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.0),
           ),
           child: Container(
             constraints: BoxConstraints(
-              maxWidth: 1500,/*MediaQuery.of(context).size.width * 0.9,*/
+              maxWidth: 1415,/*MediaQuery.of(context).size.width * 0.9,*/
               maxHeight: 800,/*MediaQuery.of(context).size.height * 0.8,*/
             ),
             child: IntrinsicWidth(
@@ -94,26 +101,44 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
                     _buildTitle(tren ?? 'Sin Tren'),
                     const SizedBox(height: 16.0),
 
-
                     _buildSearchBar(context, controllertren, controllerestacion, singleController, rangeController),
                     const SizedBox(height: 22.0),
 
-
-
-                    validationHistory.isNotEmpty
-                        ? Flexible(
-                            child: _buildDataTable(
-                                validationHistory, isScrollable, context),
-                          )
-                        : const Center(
-                            child: Text(
-                              'No hay datos disponibles',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.grey),
+                    if (provider.isLoading)
+                      const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    else if (provider.isFilter)
+                      validationHistoryTrain.isEmpty
+                          ? emptyMessage
+                          : Flexible(
+                              child: _buildDataTableFilter(
+                                validationHistoryTrain,
+                                isScrollableTrain,
+                                context,
+                              ),
+                            )
+                    else if (provider.isConsulting)
+                      informationHistoryTrain.isEmpty
+                      ? emptyMessage
+                      : Flexible(
+                        child: _buildDataTable(
+                          informationHistoryTrain, 
+                          isScrollableInfoTrain, 
+                          context,
+                        ),
+                      )
+                    else
+                      validationHistory.isEmpty
+                          ? emptyMessage
+                          : Flexible(
+                              child: _buildDataTable(
+                                validationHistory,
+                                isScrollable,
+                                context,
+                              ),
                             ),
-                          ),
-
-                          
+                  
                     const SizedBox(height: 20.0),
                     _buildCloseButton(context),
                   ],
@@ -126,38 +151,59 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
     );
   }
 
+  Widget emptyMessage = const Center(
+    child: Text(
+      'No hay datos disponibles',
+      style: TextStyle(fontSize: 16, color: Colors.grey),
+    ),
+  );
+
   Widget _buildSearchBar(
       BuildContext context,
       TextEditingController controllerTren,
       TextEditingController controllerestacion,
       CustomDatePickerController singleController,
       CustomDatePickerController rangeController) {
+      final trainProvider = Provider.of<TrainModel>(context, listen: false);
+      final trainId = trainProvider.selectedTrain;
+      final provider = Provider.of<HistorialValidacionesProvider>(context, listen: false);
+      final estacionesNombres = Provider.of<EstacionesProvider>(context).estaciones
+        .map<String>((s) => s['id_estacion'] as String)
+        .toList();
     // Función para realizar la búsqueda concatenando los dos campos
     Future<void> performSearch(BuildContext context) async {
-
       final trenId = controllerTren.text.trim();
       final estacion = controllerestacion.text.trim();
       String fecha = '';
-
+      String start = '';
+      String end = '';
       if(singleController.singleDate != null){
         fecha = DateFormat('dd').format(singleController.singleDate!);
       }else if(rangeController.range != null){
-        final start = DateFormat('dd').format(rangeController.range!.start);
-        final end = DateFormat('dd').format(rangeController.range!.end);
-
-        fecha = '$start-$end';
+        start = DateFormat('yyyy/MM/dd').format(rangeController.range!.start);
+        end = DateFormat('yyyy/MM/dd').format(rangeController.range!.end);
       }
 
-      if(trenId.isEmpty && fecha.isEmpty && estacion.isEmpty){
+      final hasRangeDate = start.isNotEmpty && end.isNotEmpty;
+
+      if(trenId.isEmpty && estacion.isEmpty && !hasRangeDate && fecha.isEmpty){
         _showFlushbar(
           context, 
-          'Favor de ingresar al menos un dato de busqueda', 
+          'Favor de ingresar datos para la busqueda', 
           Colors.red.shade400,
         );
         return;
       }
 
-      final provider = Provider.of<HistorialValidacionesProvider>(context, listen: false);
+      if(fecha.isNotEmpty && trenId.isEmpty){
+        _showFlushbar(
+          context, 
+          'Favor de ingresar el ID Tren para la busqueda', 
+          Colors.red.shade400,
+        );
+        return;
+      }
+      
       String formattedTrenId = trenId;
       int trenIdLength = trenId.length;
 
@@ -171,63 +217,15 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         formattedTrenId = trenId; // Sin espacios
       }
 
-      final searchQuery = '$formattedTrenId$fecha$estacion';
-      print("busqueda: $searchQuery");
-      print('busqueda:'+searchQuery);
+      final trenID = '$formattedTrenId$fecha';
+      await provider.historialValidacionTren(trenID, estacion, "", start, end);
 
-      await provider.historialValidaciones(searchQuery);
-
-      if(provider.validationHistory.isEmpty){
-        _showFlushbar(
-          context, 
-          'El tren $searchQuery no existe', 
-          Colors.red.shade400,
-        );
-      }
-
-      /*if (trenId.isNotEmpty && fecha.isNotEmpty) {
-        final provider = Provider.of<HistorialValidacionesProvider>(
-          context,
-          listen: false,
-        );
-
-        // Concatenar los espacios y la fecha
-        String formattedTrenId = trenId;
-        int trenIdLength = trenId.length;
-
-        if (trenIdLength == 5) {
-          formattedTrenId = '$trenId   '; // 3 espacios
-        } else if (trenIdLength == 6) {
-          formattedTrenId = '$trenId  '; // 2 espacios
-        } else if (trenIdLength == 7) {
-          formattedTrenId = '$trenId '; // 1 espacio
-        } else if (trenIdLength == 8) {
-          formattedTrenId = trenId; // Sin espacios
-        }
-
-        final searchQuery = '$formattedTrenId$fecha';
-
-        // Realiza la búsqueda de los datos del tren
-        await provider.historialValidaciones(searchQuery);
-
-        // Verifica si la lista de historial de validaciones está vacía o no
-        if (provider.validationHistory.isEmpty) {
-          _showFlushbar(
-              context,
-              'El tren $searchQuery no existe, favor de validar',
-              Colors.red.shade400);
-        }
-        return;
-      } else {
-        _showFlushbar(context, 'Favor de ingresar un tren válido y una fecha',
-            Colors.red.shade400);
-      }*/
     }
     
     return Row(
       children: [
         SizedBox(
-          width: 100,
+          width: 180,
           child: TextFormField(
             controller: controllerTren,
             onChanged: (text) {
@@ -238,7 +236,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
               );
             },
             inputFormatters: [
-              LengthLimitingTextInputFormatter(7),
+              LengthLimitingTextInputFormatter(10),
               FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
             ],
             decoration: const InputDecoration(
@@ -248,7 +246,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
           ),
         ),
         const SizedBox(width: 12.0), // Espacio entre los dos campos
-        
+
         // TextFormField para Fecha, permite solo 2 caracteres numéricos
         Row(
           children: [
@@ -274,7 +272,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
             const SizedBox(width: 12),
 
             SizedBox(
-              width: 250,
+              width: 280,
               child: ValueListenableBuilder<bool>(
                 valueListenable: singleSelected,
                 builder: (_, single, __) {
@@ -294,69 +292,95 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
           ],
         ),
 
-        /*SizedBox(
-          width: 70,
-          child: TextFormField(
-            controller: controllerFecha,
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(2),
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-            decoration: const InputDecoration(
-              labelText: 'Fecha',
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
-            onFieldSubmitted: (value) async {
-              final trenId = controllerTren.text.trim();
-              final fecha = controllerFecha.text.trim();
-              //final estacion = 
-              await performSearch(context, trenId, fecha);
-            },
-          ),
-        ),*/
-
         const SizedBox(width: 15.0),
 
         SizedBox(
-          width: 100,
-          child: TextFormField(
-            controller: controllerestacion,
-            onChanged: (text) {
-              final upperText = text.toUpperCase();
-              controllerestacion.value = TextEditingValue(
-                text: upperText,
-                selection: TextSelection.collapsed(offset: upperText.length),
+          width: 150,
+          child: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              if (textEditingValue.text.isEmpty) {
+                return const Iterable<String>.empty();
+              }
+
+              final input = textEditingValue.text.toUpperCase();
+
+              return estacionesNombres.where((option) {
+                return option.toUpperCase().contains(input);
+              });
+            },
+            onSelected: (String selection) {
+              controllerestacion.text = selection.toUpperCase();
+            },
+            fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
+              controllerestacion = controller;
+              return TextFormField(
+                controller: controller,
+                focusNode: focusNode,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(7),
+                  FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z]')),
+                ],
+                onChanged: (text) {
+                  final upperText = text.toUpperCase();
+                  controller.value = TextEditingValue(
+                    text: upperText,
+                    selection: TextSelection.collapsed(offset: upperText.length),
+                  );
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Estación',
+                  border: OutlineInputBorder(),
+                ),
               );
             },
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(7),
-              FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z]'))
-            ],
-            decoration: const InputDecoration(
-              labelText: 'Estación',
-              border: OutlineInputBorder(),
-            ),
+            optionsViewBuilder: (context, onSelected, options) {
+              return Align(
+                alignment: Alignment.topLeft,
+                child: Material(
+                  elevation: 4.0,
+                  child: SizedBox(
+                    width: 150, // 👈 MISMO WIDTH QUE EL INPUT
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: options.length,
+                      itemBuilder: (context, index) {
+                        final option = options.elementAt(index);
+                        return ListTile(
+                          title: Text(option),
+                          onTap: () => onSelected(option),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
 
         const SizedBox(width: 15.0),
+
         IconButton(
           icon: const Icon(Icons.search),
           onPressed: () => performSearch(context),
         ),
 
-
         const SizedBox(width: 12.0),
         IconButton(
           icon: const Icon(Icons.clear, color: Colors.red),
-          onPressed: () {
+          onPressed: () async {
             controllerTren.clear();
             controllerestacion.clear();
             singleController.clear();
             rangeController.clear();
             singleSelected.value = false;
             rangeSelected.value = false;
+            provider.setQuery(false);
+            if(trainId != null && trainId.isNotEmpty){
+              await provider.historialValidaciones(trainId);
+            }
+            ///provider.setFilter(false);
           },
         ),
       ],
@@ -376,6 +400,121 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
     );
   }
 
+  //Tabla de filtrado del historial de validacion
+  Widget _buildDataTableFilter(List<Map<String, dynamic>> validationHistoryTrain,
+      bool isScrollableTrain, BuildContext context) {
+        final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
+        print('entro a construir la tabla del filtrado');
+    return SizedBox(
+      height: 900,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            border: TableBorder.all(color: Colors.grey.shade400, width: 1.0),
+            columnSpacing: 10.0,
+            dataRowHeight: 65.0,
+            headingRowColor: MaterialStateProperty.all(Colors.black),
+            columns: _buildTableHeaderstFilter(context),
+            rows: validationHistoryTrain
+                .map((data) => _buildDataRowTrain(data, context))
+                .toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<DataColumn> _buildTableHeaderstFilter(context) {
+    return [
+      _buildHeaderColumn('Tren', context),
+      _buildHeaderColumn('Estación Actual', context),
+      _buildHeaderColumn('Fecha Llamado', context),
+
+    ];
+  }
+
+  DataRow _buildDataRowTrain(Map<String, dynamic> data, BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
+    final ffc = context.watch<FfccProvider>();
+
+    return DataRow(
+      cells: [
+        _buildDataCellIdTrain(
+          idTrain: data['ID_TREN'] ?? '',
+          tcn: data['TCN'] ?? '', 
+          ffc: ffc.selectedItem,
+          station: data['ESTACION'] ?? '', 
+          color: Colors.black, 
+          width: 438
+        ),
+        _buildDataCellFilter(data['ESTACION'] ?? '', Colors.black, context, width: 438),
+        _buildCellDateStringFilter(
+          SizedBox(
+            width: 438,
+            child: Center(child: Text(
+              (data['FECHA']?.toString().split(' ').first ?? ''),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            
+            ),),
+          ),
+          Colors.black, 
+          context
+        ),
+      ],
+    );
+  }
+
+  DataCell _buildDataCellIdTrain({
+    required String idTrain,
+    required String tcn,
+    required String ffc,
+    required String station,
+    Color color = Colors.black,
+    double width = 120,
+  }){
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: HoverTrainTextHistory(
+            id: idTrain,
+            tcn: tcn,
+            ffc: ffc, 
+            station: station, 
+            color: color
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildCellDateStringFilter(
+    Widget widget,
+    Color color,
+    BuildContext context
+  ) {
+    return DataCell(
+      Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Primer texto
+            widget,
+            
+          ],
+        ),
+      ),
+    );
+  }
+
+  //Tabla del historial de validacion inicial
   Widget _buildDataTable(List<Map<String, dynamic>> validationHistory,
       bool isScrollable, BuildContext context) {
         final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
@@ -442,31 +581,11 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
 
   DataRow _buildDataRow(Map<String, dynamic> record, BuildContext context) {
     final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
-    //final trenProvider = Provider.of<MotRechazoObs>(context, listen: true);
-    //final idProvider = Provider.of<IdTren>(context, listen: false);
-
     final int id = record['ID'];
     final String? validado = record['validado'];
     final String? autorizado = record['autorizado'];
-    //final String motivo = record['motivoRechazo'] ?? 'Sin motivo';
-    //final String obs = record['observaciones'] ?? 'Sin observaciones';
-
-    //final bool isSelected = trenProvider.idTrain == id;
 
     return DataRow(
-      /*selected: isSelected,
-      onSelectChanged: (selected) {
-        if (selected == true) {
-          trenProvider.setSelectedTrain(id, motivo, obs);
-          idProvider.setSelectedID(id.toString());
-          print("✅ ID seleccionado y guardado en Provider: $id");
-        } else {
-          trenProvider.clearData();
-          idProvider.setSelectedID(0.toString());
-          print("🗑 ID limpiado en Provider");
-        }
-        print('ID seleccionado en la tabla: $id');
-      },*/
       cells: [
         _buildDataCell(record['IdTren'] ?? '', Colors.black, context),
         _buildDataCell(record['origen'] ?? '', Colors.black, context),
@@ -564,12 +683,8 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
             ],
           ),
         ),
-
-          
       ],
     );
-
-    
   }
 
   DataCell buildCellExitterminal({
@@ -687,6 +802,25 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
     );
   }
 
+  DataCell _buildDataCellFilter(String value, Color textColor, BuildContext context, {double width = 120}) {
+    return DataCell(
+      Container(
+        width: width, // Asignar el ancho específico
+        alignment: Alignment.center, // Centrar el contenido
+        color: Colors.transparent, // No color de fondo
+        child: Text(
+          value.contains('T') ? _formatDateTime(value) : value.toString(),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 15.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
   // 🔥 Función para construir celdas con formato
   DataCell _buildDataCell(String value, Color textColor, BuildContext context) {
     return DataCell(
@@ -779,7 +913,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
   void _showFlushbar(
       BuildContext context, String message, Color backgroundColor) {
     Flushbar(
-      duration: const Duration(seconds: 4),
+      duration: const Duration(seconds: 6),
       backgroundColor: backgroundColor,
       flushbarPosition: FlushbarPosition.TOP,
       margin: const EdgeInsets.all(1.0),
