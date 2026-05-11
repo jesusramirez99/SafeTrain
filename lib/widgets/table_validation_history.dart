@@ -1,4 +1,5 @@
 import 'package:another_flushbar/flushbar.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -12,10 +13,10 @@ import 'package:safe_train/modelos/rechazos_observaciones_data_provider.dart';
 import 'package:safe_train/modelos/user_provider.dart';
 import 'package:safe_train/widgets/HoverTrainTextHistory.dart';
 import 'package:safe_train/widgets/custom_date.dart';
+enum FilterType {none, day, range}
 
 class HistorialValidacionesModal extends StatefulWidget {
   final Future<void>? historialFuture;
-
   const HistorialValidacionesModal({super.key, this.historialFuture});
   
 
@@ -35,12 +36,14 @@ class HistorialValidacionesModal extends StatefulWidget {
 }
 
 class _HistorialValidacionesModalState extends State<HistorialValidacionesModal> {
-  final singleController = CustomDatePickerController();
   final rangeController  = CustomDatePickerController();
   final TextEditingController controllertren = TextEditingController();
   final TextEditingController controllerestacion = TextEditingController();
-  final ValueNotifier<bool> singleSelected = ValueNotifier(false);
-  final ValueNotifier<bool> rangeSelected = ValueNotifier(false);
+  final ValueNotifier<FilterType> selectedFilter = ValueNotifier(FilterType.none);
+  final selectedDay = ValueNotifier<String?>(null);
+  //final valueListenable = ValueNotifier<String?>(null);
+  final List<String> items = ['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31'];
+  
 
   @override
   void dispose() {
@@ -86,7 +89,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
             borderRadius: BorderRadius.circular(12.0),
           ),
           child: Container(
-            constraints: BoxConstraints(
+            constraints: const BoxConstraints(
               maxWidth: 1415,/*MediaQuery.of(context).size.width * 0.9,*/
               maxHeight: 800,/*MediaQuery.of(context).size.height * 0.8,*/
             ),
@@ -101,7 +104,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
                     _buildTitle(tren ?? 'Sin Tren'),
                     const SizedBox(height: 16.0),
 
-                    _buildSearchBar(context, controllertren, controllerestacion, singleController, rangeController),
+                    _buildSearchBar(context, controllertren, controllerestacion, rangeController, selectedDay),
                     const SizedBox(height: 22.0),
 
                     if (provider.isLoading)
@@ -162,8 +165,8 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
       BuildContext context,
       TextEditingController controllerTren,
       TextEditingController controllerestacion,
-      CustomDatePickerController singleController,
-      CustomDatePickerController rangeController) {
+      CustomDatePickerController rangeController,
+      ValueNotifier<String?> selectedDay) {
       final trainProvider = Provider.of<TrainModel>(context, listen: false);
       final trainId = trainProvider.selectedTrain;
       final provider = Provider.of<HistorialValidacionesProvider>(context, listen: false);
@@ -174,28 +177,25 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
     Future<void> performSearch(BuildContext context) async {
       final trenId = controllerTren.text.trim();
       final estacion = controllerestacion.text.trim();
-      String fecha = '';
+      String selectedDropdown = '';
       String start = '';
       String end = '';
-      if(singleController.singleDate != null){
-        fecha = DateFormat('dd').format(singleController.singleDate!);
-      }else if(rangeController.range != null){
+    
+      if (selectedFilter.value == FilterType.day) {
+        selectedDropdown = selectedDay.value ?? '';
+      }
+      /// rango
+      if (selectedFilter.value == FilterType.range && rangeController.range != null) {
         start = DateFormat('yyyy/MM/dd').format(rangeController.range!.start);
         end = DateFormat('yyyy/MM/dd').format(rangeController.range!.end);
       }
-
       final hasRangeDate = start.isNotEmpty && end.isNotEmpty;
-
-      if(trenId.isEmpty && estacion.isEmpty && !hasRangeDate && fecha.isEmpty){
-        _showFlushbar(
-          context, 
-          'Favor de ingresar datos para la busqueda', 
-          Colors.red.shade400,
-        );
+      if(trenId.isEmpty && estacion.isEmpty && !hasRangeDate && selectedDropdown.isEmpty){
+        _showFlushbar(context, 'Favor de ingresar datos para la busqueda', Colors.red.shade400, );
         return;
       }
 
-      if(fecha.isNotEmpty && trenId.isEmpty){
+      if(trenId.isEmpty){
         _showFlushbar(
           context, 
           'Favor de ingresar el ID Tren para la busqueda', 
@@ -203,7 +203,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         );
         return;
       }
-      
+    
       String formattedTrenId = trenId;
       int trenIdLength = trenId.length;
 
@@ -217,15 +217,14 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         formattedTrenId = trenId; // Sin espacios
       }
 
-      final trenID = '$formattedTrenId$fecha';
+      final trenID = '$formattedTrenId$selectedDropdown';
       await provider.historialValidacionTren(trenID, estacion, "", start, end);
-
     }
     
     return Row(
       children: [
         SizedBox(
-          width: 180,
+          width: 170,
           child: TextFormField(
             controller: controllerTren,
             onChanged: (text) {
@@ -251,19 +250,55 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         Row(
           children: [
             SizedBox(
-              width: 150,
-              child: ValueListenableBuilder<bool>(
-                valueListenable: rangeSelected,
-                builder: (_, range, __) {
-                  return CustomDatePicker(
-                    mode: PickerMode.single,
-                    label: 'Fecha',
-                    controller: singleController,
-                    enabled: !range,
-                    onSingle: (date) {
-                      singleSelected.value = date != null;
-                      if (date != null) rangeSelected.value = false;
-                    },
+              width: 210,
+              child: ValueListenableBuilder<FilterType>(
+                valueListenable: selectedFilter,
+                builder: (_, filter, __) {
+                  final enabled = filter != FilterType.range;
+                  return DropdownButton2<String>(
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    hint: const Text(
+                      'Seleccione el día',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    items: items.map(
+                      (item) => DropdownItem<String>(
+                        value: item,
+                        height: 40,
+                        child: Text(item),
+                      ),
+                    ).toList(),
+                    valueListenable: selectedDay,
+                    onChanged: enabled ? (String? newValue) {
+                          selectedDay.value = newValue;
+                          if (newValue != null) {
+                            selectedFilter.value = FilterType.day;
+                            /// limpiar rango
+                            rangeController.clear();
+                          } else {
+                            selectedFilter.value = FilterType.none;
+                          }
+                        }
+                      : null,
+                    buttonStyleData: ButtonStyleData(
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black54),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      overlayColor: WidgetStateProperty.all(Colors.transparent),
+                    ),
+                    dropdownStyleData: DropdownStyleData(
+                      maxHeight: 300,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
                   );
                 },
               ),
@@ -273,17 +308,23 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
 
             SizedBox(
               width: 280,
-              child: ValueListenableBuilder<bool>(
-                valueListenable: singleSelected,
-                builder: (_, single, __) {
+              child: ValueListenableBuilder<FilterType>(
+                valueListenable: selectedFilter,
+                builder: (_, filter, __) {
+                  final enabled = filter != FilterType.day;
                   return CustomDatePicker(
                     mode: PickerMode.range,
                     label: 'Periodo',
                     controller: rangeController,
-                    enabled: !single,
+                    enabled: enabled,
                     onRange: (range) {
-                      rangeSelected.value = range != null;
-                      if (range != null) singleSelected.value = false;
+                      if (range != null) {
+                        selectedFilter.value = FilterType.range;
+                        /// limpiar dropdown
+                        selectedDay.value = null;
+                      } else {
+                        selectedFilter.value = FilterType.none;
+                      }
                     },
                   );
                 },
@@ -372,15 +413,18 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
           onPressed: () async {
             controllerTren.clear();
             controllerestacion.clear();
-            singleController.clear();
             rangeController.clear();
-            singleSelected.value = false;
-            rangeSelected.value = false;
+            /// reset dropdown
+            selectedDay.value = null;
+            /// reset filtros
+            selectedFilter.value = FilterType.none;
             provider.setQuery(false);
-            if(trainId != null && trainId.isNotEmpty){
+            if (trainId != null && trainId.isNotEmpty) {
               await provider.historialValidaciones(trainId);
+            } else {
+              provider.setFilter(false);
+              provider.setQuery(false);
             }
-            ///provider.setFilter(false);
           },
         ),
       ],
@@ -404,7 +448,6 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
   Widget _buildDataTableFilter(List<Map<String, dynamic>> validationHistoryTrain,
       bool isScrollableTrain, BuildContext context) {
         final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
-        print('entro a construir la tabla del filtrado');
     return SizedBox(
       height: 900,
       child: SingleChildScrollView(

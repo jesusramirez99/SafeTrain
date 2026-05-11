@@ -329,7 +329,6 @@ class MenuLateralState extends State<MenuLateral> {
       onPressed: () async {
         final trainProvider = Provider.of<TrainModel>(context, listen: false);
         final trainId = trainProvider.selectedTrain;
-
         final provider = Provider.of<HistorialValidacionesProvider>(
           context,
           listen: false,
@@ -340,8 +339,9 @@ class MenuLateralState extends State<MenuLateral> {
         if (trainId != null && trainId.isNotEmpty) {
           historialFuture = provider.historialValidaciones(trainId);
         } else {
-          historialFuture =
-              Future.value(); // Un Future vacío para abrir el modal sin datos
+          historialFuture = Future.value();
+          provider.setFilter(false); // Un Future vacío para abrir el modal sin datos
+          provider.setQuery(false);
         }
 
         // Abre el modal
