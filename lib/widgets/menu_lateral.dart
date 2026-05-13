@@ -335,6 +335,7 @@ class MenuLateralState extends State<MenuLateral> {
         );
 
         // Si el trainId es nulo o vacío, simplemente manda un Future vacío sin consulta
+        print('tren id: $trainId');
         Future<void> historialFuture;
         if (trainId != null && trainId.isNotEmpty) {
           historialFuture = provider.historialValidaciones(trainId);
@@ -342,6 +343,7 @@ class MenuLateralState extends State<MenuLateral> {
           historialFuture = Future.value();
           provider.setFilter(false); // Un Future vacío para abrir el modal sin datos
           provider.setQuery(false);
+
         }
 
         // Abre el modal

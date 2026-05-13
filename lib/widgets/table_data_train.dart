@@ -284,13 +284,11 @@ class _DataTrainTableState extends State<DataTrainTable> {
                                       setState(() {
                                         if (isSelected != null && isSelected) {
                                           _selectedRowIndex = index;
-                                          print("indes: ${_selectedRowIndex}");
                                           _selectedOferred = providerDataTrain.dataTrain[index]['ofrecido_por'].toString();
                                           _selectedStatus = providerDataTrain.dataTrain[index]['autorizado'].toString();
                                           _selectedTrain = providerDataTrain.dataTrain[index]['IdTren'].toString();
                                           _selectedEstation = providerDataTrain.dataTrain[index]['estacion_actual'].toString();
-                                          print('Estacion: $_selectedEstation');
-                                          print('Tren: $_selectedTrain');
+                                          
                                         
                                           selectedRowNotifier.setSelectedRow(
                                             index: _selectedRowIndex, 
@@ -309,9 +307,11 @@ class _DataTrainTableState extends State<DataTrainTable> {
                                           _selectedTrain = '';
                                           rowSelected.updateSelectedRow(null);
                                           selectedRowNotifier.clearSelection();
+                                          trainModel.clearData();
 
                                           print('Fila deseleccionada: $_selectedRowIndex');
                                           print('Tren: $_selectedTrain');
+                                          print('no selecciono tren');
                                         }
                                       });
                                       // tu lógica de selección aquí
@@ -383,6 +383,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
                               _selectedTrain = '';
                               rowSelected.updateSelectedRow(null);
                               selectedRowNotifier.clearSelection();
+                              trainModel.clearData();
 
                               print('Fila deseleccionada: $_selectedRowIndex');
                               print('Tren: $_selectedTrain');

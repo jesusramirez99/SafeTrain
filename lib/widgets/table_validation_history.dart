@@ -195,7 +195,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         return;
       }
 
-      if(trenId.isEmpty){
+      if(selectedDropdown.isNotEmpty && trenId.isEmpty){
         _showFlushbar(
           context, 
           'Favor de ingresar el ID Tren para la busqueda', 
@@ -774,7 +774,29 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
                   showDialog(
                     barrierDismissible: false,
                     context: context,
-                    builder: (context) => const RechazoObsTren(),
+                    builder: (context) {
+                      Offset offset = const Offset(0, 0);
+                      return StatefulBuilder(
+                        builder: (context, setState){
+                          return Center(
+                          child: GestureDetector(
+                            onPanUpdate: (details) {
+                              setState(() {
+                                offset += details.delta;
+                              });
+                            },
+                            child: Transform.translate(
+                              offset: offset,
+                              child: const Material(
+                                color: Colors.transparent,
+                                child: RechazoObsTren(),
+                              ),
+                            ),
+                          ),  
+                        );
+                        }
+                      );
+                    }
                   );
                 }
               }
@@ -941,7 +963,9 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
             borderRadius: BorderRadius.circular(8.0),
           ),
         ),
-        onPressed: () => Navigator.of(context).pop(),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
         child: Text(
           'Cerrar',
           style: TextStyle(
