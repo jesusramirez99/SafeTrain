@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:safe_train/config/environment.dart';
@@ -9,14 +10,14 @@ class EstacionesProvider with ChangeNotifier {
   List<Map<String, dynamic>> get estaciones => _estaciones;
 
   // FUNCION PARA MOSTRAR LAS ESTACIONES
-  Future<void> fetchEstaciones() async {
+  Future<void> fetchEstaciones(String ffcc) async {
     final url =
-        Uri.parse('${Enviroment.baseUrl}/getEstaciones');
+        Uri.parse('${Enviroment.baseUrl}/getEstacionesFFCC?ffcc=$ffcc');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        _estaciones = List<Map<String, dynamic>>.from(data['show_cars']);
+        _estaciones = List<Map<String, dynamic>>.from(data['estaciones']);
         notifyListeners();
       } else {
         throw Exception('Error al cargar las estaciones');

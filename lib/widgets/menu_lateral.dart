@@ -206,6 +206,8 @@ class MenuLateralState extends State<MenuLateral> {
     final userName = Provider.of<UserProvider>(context, listen: false);
     final providerDataTrain = Provider.of<TablesTrainsProvider>(context, listen: false);
     final user = userName.userName;
+    final ffccProvider = Provider.of<FfccProvider>(context, listen: false);
+    final ffcc = ffccProvider.selectedItem;
 
     return ValueListenableBuilder<int?>(
       valueListenable: selectionNotifier.selectedRowNotifier,
@@ -225,7 +227,7 @@ class MenuLateralState extends State<MenuLateral> {
                         await Future.delayed(const Duration(seconds: 5));
 
                         // Llamamos a validacionReglas para obtener las reglas validadas
-                        bool isValid = await validacionProvider.validacionReglas(tren!, estacion!, '', user!, estacion);
+                        bool isValid = await validacionProvider.validacionReglas(tren!, estacion!, '', user!, estacion, ffcc);
 
                         //print('Reglas: ${isValid}');
                         

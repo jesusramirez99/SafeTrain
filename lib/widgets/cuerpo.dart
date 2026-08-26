@@ -90,9 +90,9 @@ class CuerpoState extends State<Cuerpo> {
   void initState() {
     super.initState();
     _dropdownValue = null; // Inicialmente no hay valor seleccionado
-    Future.microtask(() =>
-        Provider.of<EstacionesProvider>(context, listen: false)
-            .fetchEstaciones());
+    final ffccProvider = Provider.of<FfccProvider>(context, listen: false);
+    final ffcc = ffccProvider.selectedItem;
+    Future.microtask(() => Provider.of<EstacionesProvider>(context, listen: false).fetchEstaciones(ffcc));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
@@ -225,7 +225,7 @@ class CuerpoState extends State<Cuerpo> {
     // Breakpoints simples
     //final isMediumScreen = screenWidth > 1200 && screenWidth <= 1800;
     final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
-
+    
     return Scaffold(
       body: Column(
         children: <Widget>[

@@ -18,9 +18,10 @@ class ValidacionReglasProvider extends ChangeNotifier {
     String validated,
     String userName,
     String estacionActual,
+    String ferrocarril,
   ) async {
     final url =
-        Uri.parse('${Enviroment.baseUrl}/ValidarReglas');
+        Uri.parse('${Enviroment.baseUrl}/ValidarTren');
 
     _setLoadingState(true);
     _resetState();
@@ -32,6 +33,7 @@ class ValidacionReglasProvider extends ChangeNotifier {
         validated,
         userName,
         estacionActual,
+        ferrocarril,
       );
 
       final response = await http.post(
@@ -63,6 +65,7 @@ class ValidacionReglasProvider extends ChangeNotifier {
     String validated,
     String userName,
     String estacionActual,
+    String ferrocarril,
   ) {
     return jsonEncode({
       'Pending_Train_ID': idTren,
@@ -71,6 +74,7 @@ class ValidacionReglasProvider extends ChangeNotifier {
       'Validated_By': userName,
       'Validated_Date': DateTime.now().toIso8601String(),
       'estacion_actual': estacionActual,
+      'ferrocarril': ferrocarril,
     });
   }
 
@@ -79,7 +83,8 @@ class ValidacionReglasProvider extends ChangeNotifier {
     final data = jsonDecode(response.body);
 
     if (data['Reglas']['success'] == true) {
-      resultadoMensaje = data['Reglas']['message'] ?? 'Mensaje no disponible';
+      final mensaje = data['Reglas']['Message'];
+      resultadoMensaje = mensaje != null && mensaje.trim().isNotEmpty? mensaje : 'Mensaje no disponible';
 
       if (data['Reglas']['wrapper'].length > 0) {
         final reglas = data['Reglas']['wrapper'] as List;
