@@ -83,7 +83,7 @@ class ValidacionReglasProvider extends ChangeNotifier {
     final data = jsonDecode(response.body);
 
     if (data['Reglas']['success'] == true) {
-      final mensaje = data['Reglas']['Message'];
+      final mensaje = data['Reglas']['message'];
       resultadoMensaje = mensaje != null && mensaje.trim().isNotEmpty? mensaje : 'Mensaje no disponible';
 
       if (data['Reglas']['wrapper'].length > 0) {
