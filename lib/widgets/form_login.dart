@@ -25,11 +25,13 @@ class _FormLoginState extends State<FormLogin> {
     if (_formKeyLogin.currentState!.validate()) {
       String user = _userController.text;
       String password = _passwordController.text;
+      String selectedItem = contextPro.read<FfccProvider>().selectedItem;
+      String aplication = 'OPERACIONES';
 
       final loginProvider =
           Provider.of<LoginProvider>(contextPro, listen: false);
 
-      final loginSuccess = await loginProvider.login(context, user, password);
+      final loginSuccess = await loginProvider.login(context, user, password, aplication, selectedItem);
 
       if (loginSuccess) {
         final region = loginProvider.regionPrincipal;

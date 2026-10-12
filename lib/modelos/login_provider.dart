@@ -20,7 +20,7 @@ class LoginProvider with ChangeNotifier {
 
   String? get regionPrincipal => _regiones.isNotEmpty ? _regiones.first : null;
 
-  Future<bool> login(BuildContext context, String userName, String password) async {
+  Future<bool> login(BuildContext context, String userName, String password, String aplicativo, String ffcc) async {
     _isLoading = true;
     _errorMessage = null;
     _userData = null;
@@ -31,7 +31,7 @@ class LoginProvider with ChangeNotifier {
       final response = await http.post(
         Uri.parse('${Enviroment.baseUrl}/getLoginCCO'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({'USER_NAME': userName, 'PASSWORD': password}),
+        body: json.encode({'USER_NAME': userName, 'PASSWORD': password, 'APLICATIVO': aplicativo, 'FFCC': ffcc}),
       );
 
       if (response.statusCode == 200) {
